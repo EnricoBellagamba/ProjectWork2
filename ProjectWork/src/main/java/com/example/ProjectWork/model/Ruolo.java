@@ -11,7 +11,9 @@ public class Ruolo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idRuolo;
 
+    @Column(nullable = false)
     private String codice;
+
     private String descrizione;
 
     @OneToMany(mappedBy = "ruolo")

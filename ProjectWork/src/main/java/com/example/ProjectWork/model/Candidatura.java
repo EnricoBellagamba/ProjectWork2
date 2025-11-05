@@ -18,9 +18,10 @@ public class Candidatura {
     @JoinColumn(name = "idPosizione")
     private Posizione posizione;
 
-    //@ManyToOne
-    //@JoinColumn(name = "idStatoCandidatura")
-   // private StatoCandidatura stato;
+//    @ManyToOne
+//    @JoinColumn(name = "idStatoCandidatura")
+//    private StatoCandidatura stato;
 
+    @Column(nullable = false)
     private LocalDate dataInvio;
 }
