@@ -11,5 +11,11 @@ public class Candidato {
 
     @OneToOne
     @JoinColumn(name = "idUtente")
-    private Utente utente;
+    @Column(nullable = false)
+    private Utente idUtente;
+
+    @Column(nullable = false)
+    private Boolean isActive;
+
+
 }

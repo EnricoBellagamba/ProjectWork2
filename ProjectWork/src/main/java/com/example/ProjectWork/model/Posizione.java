@@ -2,9 +2,8 @@ package com.example.ProjectWork.model;
 
 
 import jakarta.persistence.*;
-
 import java.time.LocalDate;
-import java.util.List;
+import jakarta.validation.constraints.Min;
 
 @Entity
 public class Posizione {
@@ -16,31 +15,39 @@ public class Posizione {
     @Column(nullable = false)
     private String titolo;
 
-    @Column(nullable = false)
+    @Column
     private String descrizione;
 
+    @Column
     private String sede;
+
+    @Column
     private String contratto;
-    private Double ral;
-    private LocalDate pubblicataAl;
-    private LocalDate chiusaAl;
-    private Boolean chiusa;
+
+    @Column
+    private Double RAL;
+
+    @Column(nullable = false)
+    @Min(value=0)
+    private Long candidatureRicevute;
+
+    @Column
+    private LocalDate pubblicataAt;
+
+    @Column
+    private LocalDate chiusaAt;
+
+    @Column
+    private Utente cratedByHR;
 
     @ManyToOne
     @JoinColumn(name = "idStatoPosizione")
-    private StatoPosizione statoPosizione;
+    @Column(nullable = false)
+    private StatoPosizione idStatoPosizione;
 
-    @OneToMany(mappedBy = "posizione")
-    private List<Candidatura> candidature;
+    @ManyToOne
+    @JoinColumn(name = "idSettore")
+    private Settore idSettore;
 
-/*
-    @ManyToMany
-    @JoinTable(
-            name = "POSIZIONE_TEST",
-            joinColumns = @JoinColumn(name = "idPosizione"),
-            inverseJoinColumns = @JoinColumn(name = "idTest")
-    )
-    private List<Test> testAssociati;
-*/
 }
 

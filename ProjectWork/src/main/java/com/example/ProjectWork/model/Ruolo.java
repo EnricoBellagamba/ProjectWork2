@@ -11,11 +11,13 @@ public class Ruolo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idRuolo;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String codice;
 
+    @Column(nullable = false)
     private String descrizione;
 
-    @OneToMany(mappedBy = "ruolo")
+    @OneToMany(mappedBy = "idRuolo")
     private List<Utente> utenti;
+
 }

@@ -3,14 +3,10 @@ package com.example.ProjectWork.model;
 import jakarta.persistence.*;
 
 @Entity
-public class StatoPosizione {
+public class TipoTest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idStatoPosizione;
-
-    @Column(nullable = false, unique = true)
-    private Integer codice;
-
-    @Column
+    private Long idTipoTest;
+    private String codice;
     private String descrizione;
 }
