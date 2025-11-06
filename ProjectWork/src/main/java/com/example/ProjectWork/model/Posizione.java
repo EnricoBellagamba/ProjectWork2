@@ -37,8 +37,9 @@ public class Posizione {
     @Column
     private LocalDate chiusaAt;
 
-    @Column
-    private Utente cratedByHR;
+    @ManyToOne
+    @JoinColumn(name = "idUtente")
+    private Utente createdByHR;
 
     @ManyToOne
     @JoinColumn(name = "idStatoPosizione")
