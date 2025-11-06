@@ -52,7 +52,6 @@ public class Utente {
 
     @ManyToOne
     @JoinColumn(name = "idRuolo")
-    @Column(nullable = false)
     private Ruolo idRuolo;
 
 }

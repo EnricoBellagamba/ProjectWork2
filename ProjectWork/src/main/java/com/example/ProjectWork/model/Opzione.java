@@ -9,10 +9,14 @@ public class Opzione {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idOpzione;
 
-    private String testoOpzione;
-    private Boolean corretta;
-
     @ManyToOne
     @JoinColumn(name = "idDomanda")
-    private Domanda domanda;
+    private Domanda idDomanda;
+
+    @Column(nullable = false)
+    private String testoOpzione;
+
+    @Column(nullable = false)
+    private Boolean iscorretta;
+
 }

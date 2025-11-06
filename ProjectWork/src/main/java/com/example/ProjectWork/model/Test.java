@@ -11,27 +11,29 @@ public class Test {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idTest;
 
+    @Column(nullable = false)
     private String titolo;
+
+    @Column
     private String descrizione;
+
+    @Column(nullable = false)
     private Integer durataMinuti;
+
+    @Column(nullable = false)
     private Integer numeroDomande;
+
+    @Column(nullable = false)
     private Double punteggioMax;
+
+    @Column(nullable = false)
+    private Double punteggioMin;
+
+    @Column(nullable = false)
+    private Boolean isAttivo;
 
     @ManyToOne
     @JoinColumn(name = "idTipoTest")
     private TipoTest tipoTest;
 
-    @OneToMany(mappedBy = "test")
-    private List<Domanda> domande;
-
-    @ManyToMany(mappedBy = "testAssociati")
-    private List<Posizione> posizioni;
-
-    @ManyToMany
-    @JoinTable(
-            name = "SETTORE_TEST",
-            joinColumns = @JoinColumn(name = "idTest"),
-            inverseJoinColumns = @JoinColumn(name = "idSettore")
-    )
-    private List<Settore> settori;
 }

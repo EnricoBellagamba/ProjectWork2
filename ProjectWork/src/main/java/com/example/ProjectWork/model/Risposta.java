@@ -9,15 +9,19 @@ public class Risposta {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idRisposta;
 
+
+    @Column
+    private Integer punteggioAssegnato;
+
     @ManyToOne
     @JoinColumn(name = "idTentativo")
-    private TentativoTest tentativo;
+    private TentativoTest idTentativo;
 
     @ManyToOne
     @JoinColumn(name = "idDomanda")
-    private Domanda domanda;
+    private Domanda idDomanda;
 
     @ManyToOne
     @JoinColumn(name = "idOpzione")
-    private Opzione scelta;
+    private Opzione idOpzione; //scelta
 }

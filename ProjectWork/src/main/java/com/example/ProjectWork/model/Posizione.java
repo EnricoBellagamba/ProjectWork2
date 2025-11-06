@@ -42,7 +42,6 @@ public class Posizione {
 
     @ManyToOne
     @JoinColumn(name = "idStatoPosizione")
-    @Column(nullable = false)
     private StatoPosizione idStatoPosizione;
 
     @ManyToOne

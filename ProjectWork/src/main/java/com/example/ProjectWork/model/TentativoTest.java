@@ -1,8 +1,8 @@
 package com.example.ProjectWork.model;
 
 import jakarta.persistence.*;
-
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 public class TentativoTest {
@@ -13,19 +13,23 @@ public class TentativoTest {
 
     @ManyToOne
     @JoinColumn(name = "idCandidatura")
-    private Candidatura candidatura;
+    private Candidatura idCandidatura;
 
     @ManyToOne
     @JoinColumn(name = "idTest")
-    private Test test;
+    private Test idTest;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "idEsitoTentativo")
-    private EsitoTentativo esito;
+    private EsitoTentativo idEsitoTentativo;
 
-    private LocalDate inizio;
-    private LocalDate fine;
+    @Column(nullable = false)
+    private LocalDate IniziatoAt;
 
-    @OneToMany(mappedBy = "tentativo")
-    private List<Risposta> risposte;
+    @Column
+    private LocalDate completatoAt;
+
+    @Column(nullable = false)
+    private Integer punteggioTotale;
+
 }

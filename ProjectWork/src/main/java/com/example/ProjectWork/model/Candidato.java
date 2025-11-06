@@ -11,7 +11,6 @@ public class Candidato {
 
     @OneToOne
     @JoinColumn(name = "idUtente")
-    @Column(nullable = false)
     private Utente idUtente;
 
     @Column(nullable = false)

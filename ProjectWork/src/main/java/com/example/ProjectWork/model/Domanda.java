@@ -15,8 +15,7 @@ public class Domanda {
     @JoinColumn(name = "idTest")
     private Test test;
 
+    @Column(nullable = false)
     private String testo;
 
-    @OneToMany(mappedBy = "domanda")
-    private List<Opzione> opzioni;
 }
