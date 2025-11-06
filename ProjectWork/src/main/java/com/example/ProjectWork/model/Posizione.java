@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import jakarta.validation.constraints.Min;
 
 @Entity
+@Table(name = "dbo.POSIZIONE")
 public class Posizione {
 
     @Id

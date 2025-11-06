@@ -2,9 +2,8 @@ package com.example.ProjectWork.model;
 
 import jakarta.persistence.*;
 
-import java.util.List;
-
 @Entity
+@Table(name = "dbo.DOMANDA")
 public class Domanda {
 
     @Id

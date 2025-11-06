@@ -1,10 +1,9 @@
 package com.example.ProjectWork.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 
 @Entity
+@Table(name = "dbo.STATO_CANDIDATURA")
 public class StatoCandidatura {
 
     @Id

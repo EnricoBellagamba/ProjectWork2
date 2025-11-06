@@ -3,6 +3,7 @@ package com.example.ProjectWork.model;
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "dbo.OPZIONE")
 public class Opzione {
 
     @Id

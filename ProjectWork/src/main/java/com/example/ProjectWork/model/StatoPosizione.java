@@ -3,6 +3,7 @@ package com.example.ProjectWork.model;
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "dbo.STATO_POSIZIONE")
 public class StatoPosizione {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
