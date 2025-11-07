@@ -4,9 +4,8 @@ import com.example.ProjectWork.model.Posizione;
 import com.example.ProjectWork.repository.PosizioneRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -20,6 +19,11 @@ public class PosizioneController {
     @GetMapping
     public ResponseEntity<List<Posizione>> findAll() {
         return ResponseEntity.ok(posizioneRepo.findAll());
+    }
+
+    @PostMapping("/nuova")
+    public ResponseEntity<Posizione> save(@RequestBody Posizione posizione) {
+        return ResponseEntity.ok(posizioneRepo.save(posizione));
     }
 
 

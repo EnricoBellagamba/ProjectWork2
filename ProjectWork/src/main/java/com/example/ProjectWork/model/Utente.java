@@ -1,5 +1,6 @@
 package com.example.ProjectWork.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 
@@ -53,6 +54,7 @@ public class Utente {
 
     @ManyToOne
     @JoinColumn(name = "idRuolo")
+    @JsonBackReference
     private Ruolo idRuolo;
 
     public Long getIdUtente() {
