@@ -3,7 +3,7 @@ package com.example.ProjectWork.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "dbo.RISPOSTA")
+@Table(name = "RISPOSTA", schema = "dbo")
 public class Risposta {
 
     @Id
@@ -22,6 +22,6 @@ public class Risposta {
     private Domanda idDomanda;
 
     @ManyToOne
-    @JoinColumn(name = "idOpzione")
+    @JoinColumn(name = "scelta")
     private Opzione idOpzione; //scelta
 }

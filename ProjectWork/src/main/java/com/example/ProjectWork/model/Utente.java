@@ -7,7 +7,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "dbo.UTENTE")
+@Table(name = "UTENTE", schema = "dbo")
 public class Utente {
 
     @Id

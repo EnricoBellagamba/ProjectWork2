@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import jakarta.validation.constraints.Min;
 
 @Entity
-@Table(name = "dbo.POSIZIONE")
+@Table(name = "POSIZIONE", schema = "dbo")
 public class Posizione {
 
     @Id
@@ -39,7 +39,7 @@ public class Posizione {
     private LocalDate chiusaAt;
 
     @ManyToOne
-    @JoinColumn(name = "idUtente")
+    @JoinColumn(name = "createdByHR")
     private Utente createdByHR;
 
     @ManyToOne

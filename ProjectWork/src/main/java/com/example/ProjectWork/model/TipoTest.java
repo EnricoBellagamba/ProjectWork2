@@ -3,7 +3,7 @@ package com.example.ProjectWork.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "dbo.TIPO_TEST")
+@Table(name = "TIPO_TEST", schema = "dbo")
 public class TipoTest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import java.util.List;
 
 @Entity
-@Table(name = "dbo.TEST")
+@Table(name = "TEST", schema = "dbo")
 public class Test {
 
     @Id
@@ -25,10 +25,10 @@ public class Test {
     private Integer numeroDomande;
 
     @Column(nullable = false)
-    private Double punteggioMax;
+    private Integer punteggioMax;
 
     @Column(nullable = false)
-    private Double punteggioMin;
+    private Integer punteggioMin;
 
     @Column(nullable = false)
     private Boolean isAttivo;
