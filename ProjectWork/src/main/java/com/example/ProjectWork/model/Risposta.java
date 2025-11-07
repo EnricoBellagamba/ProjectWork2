@@ -10,7 +10,6 @@ public class Risposta {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idRisposta;
 
-
     @Column
     private Integer punteggioAssegnato;
 
