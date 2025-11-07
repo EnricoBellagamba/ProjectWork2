@@ -3,7 +3,7 @@ package com.example.ProjectWork.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "dbo.DOMANDA")
+@Table(name = "DOMANDA", schema = "dbo")
 public class Domanda {
 
     @Id

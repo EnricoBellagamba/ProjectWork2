@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "dbo.CANDIDATURA")
+@Table(name = "CANDIDATURA" ,schema = "dbo")
 public class Candidatura {
 
     @Id
@@ -24,5 +24,5 @@ public class Candidatura {
     private StatoCandidatura stato;
 
     @Column(nullable = false)
-    private LocalDate dataInvio;
+    private LocalDate createdAT;
 }
