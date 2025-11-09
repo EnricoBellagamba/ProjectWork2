@@ -8,4 +8,5 @@ import java.util.List;
 public interface PosizioneService {
     List<Posizione> getAllPosizioni();
     Posizione createPosizione(Posizione posizione);
+    void deletePosizione(Long id);
 }

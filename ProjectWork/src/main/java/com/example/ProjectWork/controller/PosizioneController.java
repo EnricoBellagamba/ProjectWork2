@@ -29,8 +29,14 @@ public class PosizioneController {
 
     @PostMapping("/nuova")
     public ResponseEntity<Posizione> save(@RequestBody Posizione posizione) {
-        //TODO:
         Posizione newPosizione = posizioneService.createPosizione(posizione);
         return ResponseEntity.ok(newPosizione);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletePosizione(@PathVariable Long id ){
+        posizioneService.deletePosizione(id);
+        return ResponseEntity.noContent().build();
+
     }
 }

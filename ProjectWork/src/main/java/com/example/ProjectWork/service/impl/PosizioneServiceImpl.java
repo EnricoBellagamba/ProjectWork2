@@ -26,4 +26,13 @@ public class PosizioneServiceImpl implements PosizioneService {
     public Posizione createPosizione(Posizione posizione) {
         return posizioneRepository.save(posizione);
     }
+
+    @Override
+    public void deletePosizione(Long id) {
+        if (!posizioneRepository.existsById(id)) {
+            throw new RuntimeException("Utente non trovato con ID: " + id);
+        }
+        posizioneRepository.deleteById(id);
+    }
+
 }
