@@ -18,4 +18,35 @@ public class Settore {
     @Column
     private String descrizione;
 
+    public Long getIdSettore() {
+        return idSettore;
+    }
+
+    public void setIdSettore(Long idSettore) {
+        this.idSettore = idSettore;
+    }
+
+    public String getCodice() {
+        return codice;
+    }
+
+    public void setCodice(String codice) {
+        this.codice = codice;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public String getDescrizione() {
+        return descrizione;
+    }
+
+    public void setDescrizione(String descrizione) {
+        this.descrizione = descrizione;
+    }
 }

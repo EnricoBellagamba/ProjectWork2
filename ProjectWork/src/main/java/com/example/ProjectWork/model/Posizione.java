@@ -50,5 +50,100 @@ public class Posizione {
     @JoinColumn(name = "idSettore")
     private Settore idSettore;
 
+    public Long getIdPosizione() {
+        return idPosizione;
+    }
+
+    public void setIdPosizione(Long idPosizione) {
+        this.idPosizione = idPosizione;
+    }
+
+    public String getTitolo() {
+        return titolo;
+    }
+
+    public void setTitolo(String titolo) {
+        this.titolo = titolo;
+    }
+
+    public String getDescrizione() {
+        return descrizione;
+    }
+
+    public void setDescrizione(String descrizione) {
+        this.descrizione = descrizione;
+    }
+
+    public String getSede() {
+        return sede;
+    }
+
+    public void setSede(String sede) {
+        this.sede = sede;
+    }
+
+    public String getContratto() {
+        return contratto;
+    }
+
+    public void setContratto(String contratto) {
+        this.contratto = contratto;
+    }
+
+    public Double getRAL() {
+        return RAL;
+    }
+
+    public void setRAL(Double RAL) {
+        this.RAL = RAL;
+    }
+
+    public Long getCandidatureRicevute() {
+        return candidatureRicevute;
+    }
+
+    public void setCandidatureRicevute(Long candidatureRicevute) {
+        this.candidatureRicevute = candidatureRicevute;
+    }
+
+    public LocalDate getPubblicataAt() {
+        return pubblicataAt;
+    }
+
+    public void setPubblicataAt(LocalDate pubblicataAt) {
+        this.pubblicataAt = pubblicataAt;
+    }
+
+    public LocalDate getChiusaAt() {
+        return chiusaAt;
+    }
+
+    public void setChiusaAt(LocalDate chiusaAt) {
+        this.chiusaAt = chiusaAt;
+    }
+
+    public Utente getCreatedByHR() {
+        return createdByHR;
+    }
+
+    public void setCreatedByHR(Utente createdByHR) {
+        this.createdByHR = createdByHR;
+    }
+
+    public StatoPosizione getIdStatoPosizione() {
+        return idStatoPosizione;
+    }
+
+    public void setIdStatoPosizione(StatoPosizione idStatoPosizione) {
+        this.idStatoPosizione = idStatoPosizione;
+    }
+
+    public Settore getIdSettore() {
+        return idSettore;
+    }
+
+    public void setIdSettore(Settore idSettore) {
+        this.idSettore = idSettore;
+    }
 }
 
