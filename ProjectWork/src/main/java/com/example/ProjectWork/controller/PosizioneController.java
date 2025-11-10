@@ -17,6 +17,9 @@ public class PosizioneController {
     @Autowired
     private final PosizioneService posizioneService;
 
+    @Autowired
+    private PosizioneRepository posizioneRepository;
+
     public PosizioneController(PosizioneService posizioneService) {
         this.posizioneService = posizioneService;
     }
@@ -25,6 +28,11 @@ public class PosizioneController {
     public ResponseEntity<List<Posizione>> findAll() {
         List<Posizione> posizioni = posizioneService.getAllPosizioni();
         return ResponseEntity.ok(posizioni);
+    }
+
+    @GetMapping("/topquattro")
+    public ResponseEntity<List<Posizione>> topQuattro() {
+        return ResponseEntity.ok(posizioneRepository.topQuattroPosizioni());
     }
 
     @PostMapping("/nuova")
