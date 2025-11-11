@@ -37,4 +37,75 @@ public class Test {
     @JoinColumn(name = "idTipoTest")
     private TipoTest tipoTest;
 
+    public Long getIdTest() {
+        return idTest;
+    }
+
+    public void setIdTest(Long idTest) {
+        this.idTest = idTest;
+    }
+
+    public String getTitolo() {
+        return titolo;
+    }
+
+    public void setTitolo(String titolo) {
+        this.titolo = titolo;
+    }
+
+    public String getDescrizione() {
+        return descrizione;
+    }
+
+    public void setDescrizione(String descrizione) {
+        this.descrizione = descrizione;
+    }
+
+    public Integer getDurataMinuti() {
+        return durataMinuti;
+    }
+
+    public void setDurataMinuti(Integer durataMinuti) {
+        this.durataMinuti = durataMinuti;
+    }
+
+    public Integer getNumeroDomande() {
+        return numeroDomande;
+    }
+
+    public void setNumeroDomande(Integer numeroDomande) {
+        this.numeroDomande = numeroDomande;
+    }
+
+    public Integer getPunteggioMax() {
+        return punteggioMax;
+    }
+
+    public void setPunteggioMax(Integer punteggioMax) {
+        this.punteggioMax = punteggioMax;
+    }
+
+    public Integer getPunteggioMin() {
+        return punteggioMin;
+    }
+
+    public void setPunteggioMin(Integer punteggioMin) {
+        this.punteggioMin = punteggioMin;
+    }
+
+    public Boolean getAttivo() {
+        return isAttivo;
+    }
+
+    public void setAttivo(Boolean attivo) {
+        isAttivo = attivo;
+    }
+
+    public TipoTest getTipoTest() {
+        return tipoTest;
+    }
+
+    public void setTipoTest(TipoTest tipoTest) {
+        this.tipoTest = tipoTest;
+    }
 }

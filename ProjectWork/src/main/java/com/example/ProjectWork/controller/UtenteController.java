@@ -21,22 +21,19 @@ public class UtenteController {
     // GET ALL
     @GetMapping
     public ResponseEntity<List<Utente>> getAllUtenti() {
-        List<Utente> utenti = utenteService.getAllUtenti();
-        return ResponseEntity.ok(utenti);
+        return ResponseEntity.ok(utenteService.getAllUtenti());
     }
 
     // GET BY ID
     @GetMapping("/{id}")
     public ResponseEntity<Utente> getUtenteById(@PathVariable Long id) {
-        Utente utente = utenteService.getUtenteById(id);
-        return ResponseEntity.ok(utente);
+        return ResponseEntity.ok(utenteService.getUtenteById(id));
     }
 
     // CREATE
     @PostMapping
     public ResponseEntity<Utente> createUtente(@RequestBody Utente utente) {
-        Utente newUtente = utenteService.createUtente(utente);
-        return ResponseEntity.ok(newUtente);
+        return ResponseEntity.ok(utenteService.createUtente(utente));
     }
 
     // UPDATE
@@ -45,8 +42,7 @@ public class UtenteController {
             @PathVariable Long id,
             @RequestBody Utente utenteDetails) {
 
-        Utente update = utenteService.updateUtente(id, utenteDetails);
-        return ResponseEntity.ok(update);
+        return ResponseEntity.ok(utenteService.updateUtente(id, utenteDetails));
     }
 
     // DELETE

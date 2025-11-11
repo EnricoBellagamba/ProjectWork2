@@ -42,7 +42,7 @@ public class PosizioneController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePosizione(@PathVariable Long id ){
+    public ResponseEntity<Void> deletePosizione(@PathVariable Long id){
         posizioneService.deletePosizione(id);
         return ResponseEntity.noContent().build();
 

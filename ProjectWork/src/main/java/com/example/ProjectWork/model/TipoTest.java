@@ -14,4 +14,32 @@ public class TipoTest {
 
     @Column
     private String descrizione;
+
+
+    // getter e setter
+
+
+    public Long getIdTipoTest() {
+        return idTipoTest;
+    }
+
+    public void setIdTipoTest(Long idTipoTest) {
+        this.idTipoTest = idTipoTest;
+    }
+
+    public String getCodice() {
+        return codice;
+    }
+
+    public void setCodice(String codice) {
+        this.codice = codice;
+    }
+
+    public String getDescrizione() {
+        return descrizione;
+    }
+
+    public void setDescrizione(String descrizione) {
+        this.descrizione = descrizione;
+    }
 }
