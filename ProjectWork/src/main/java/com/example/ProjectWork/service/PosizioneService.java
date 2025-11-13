@@ -9,4 +9,6 @@ public interface PosizioneService {
     List<Posizione> getAllPosizioni();
     Posizione createPosizione(Posizione posizione);
     void deletePosizione(Long id);
+    Posizione getPosizioneById (Long id);
+
 }

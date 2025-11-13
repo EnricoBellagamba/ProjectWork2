@@ -5,7 +5,6 @@ import com.example.ProjectWork.repository.PosizioneRepository;
 import com.example.ProjectWork.service.PosizioneService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -47,4 +46,12 @@ public class PosizioneController {
         return ResponseEntity.noContent().build();
 
     }
+
+    // GET POSIZIONE BY ID
+    @GetMapping("/{id}")
+    public ResponseEntity<Posizione> getPosizioneById(@PathVariable Long id) {
+        return ResponseEntity.ok(posizioneService.getPosizioneById(id));
+    }
+
+
 }

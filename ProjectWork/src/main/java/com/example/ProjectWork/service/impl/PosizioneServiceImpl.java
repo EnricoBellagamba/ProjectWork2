@@ -35,4 +35,10 @@ public class PosizioneServiceImpl implements PosizioneService {
         posizioneRepository.deleteById(id);
     }
 
+    @Override
+    public Posizione getPosizioneById(Long id) {
+        return posizioneRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Posizione non trovato con ID: " + id));
+    }
+
 }
