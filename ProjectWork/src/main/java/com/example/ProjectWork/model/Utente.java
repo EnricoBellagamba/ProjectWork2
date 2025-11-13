@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -18,6 +19,7 @@ public class Utente {
 
     @Column(nullable = false)
     @Email(message = "Il formato dell'email inserita è sbagliato")
+    @Pattern(regexp = ".+@.+\\..+", message = "Email deve avere un dominio valido")
     @NotBlank(message = "L'email è obbligatoria")
     private String email;
 
