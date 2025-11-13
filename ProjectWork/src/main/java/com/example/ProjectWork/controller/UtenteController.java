@@ -2,6 +2,7 @@ package com.example.ProjectWork.controller;
 
 import com.example.ProjectWork.model.Utente;
 import com.example.ProjectWork.service.UtenteService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -32,7 +33,7 @@ public class UtenteController {
 
     // CREATE
     @PostMapping
-    public ResponseEntity<Utente> createUtente(@RequestBody Utente utente) {
+    public ResponseEntity<Utente> createUtente(@Valid @RequestBody Utente utente) {
         return ResponseEntity.ok(utenteService.createUtente(utente));
     }
 

@@ -3,6 +3,7 @@ package com.example.ProjectWork.model;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -16,16 +17,20 @@ public class Utente {
     private Long idUtente;
 
     @Column(nullable = false)
-    @Email
+    @Email(message = "Il formato dell'email inserita è sbagliato")
+    @NotBlank(message = "L'email è obbligatoria")
     private String email;
 
     @Column(nullable = false)
+    @NotBlank(message = "Devi inserire una password")
     private String passwordHash;
 
     @Column(nullable = false)
+    @NotBlank
     private String nome;
 
     @Column(nullable = false)
+    @NotBlank
     private String cognome;
 
     @Column(nullable = false)
