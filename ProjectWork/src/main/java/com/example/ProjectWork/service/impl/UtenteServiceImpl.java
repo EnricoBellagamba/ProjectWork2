@@ -3,6 +3,7 @@ package com.example.ProjectWork.service.impl;
 import com.example.ProjectWork.model.Utente;
 import com.example.ProjectWork.repository.UtenteRepository;
 import com.example.ProjectWork.service.UtenteService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,9 +12,11 @@ import java.util.List;
 public class UtenteServiceImpl implements UtenteService {
 
     private final UtenteRepository utenteRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UtenteServiceImpl(UtenteRepository utenteRepository) {
+    public UtenteServiceImpl(UtenteRepository utenteRepository, PasswordEncoder passwordEncoder) {
         this.utenteRepository = utenteRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -29,6 +32,12 @@ public class UtenteServiceImpl implements UtenteService {
 
     @Override
     public Utente createUtente(Utente utente) {
+        // Cripta la password solo se è stata fornita
+        if (utente.getPasswordHash() != null && !utente.getPasswordHash().isBlank()) {
+            String hashedPassword = passwordEncoder.encode(utente.getPasswordHash());
+            utente.setPasswordHash(hashedPassword);
+        }
+
         return utenteRepository.save(utente);
     }
 
@@ -58,5 +67,10 @@ public class UtenteServiceImpl implements UtenteService {
             throw new RuntimeException("Utente non trovato con ID: " + id);
         }
         utenteRepository.deleteById(id);
+    }
+
+    public boolean verificaPassword(String rawPassword, String hashedPassword) {
+        // Confronta la password fornita con quella salvata
+        return passwordEncoder.matches(rawPassword, hashedPassword);
     }
 }

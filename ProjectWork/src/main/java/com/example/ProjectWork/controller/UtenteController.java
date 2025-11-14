@@ -1,9 +1,13 @@
 package com.example.ProjectWork.controller;
 
+import com.example.ProjectWork.config.SecurityConfig;
 import com.example.ProjectWork.model.Utente;
+import com.example.ProjectWork.repository.UtenteRepository;
 import com.example.ProjectWork.service.UtenteService;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -13,11 +17,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/utenti")
 public class UtenteController {
 
-    private final UtenteService utenteService;
+    @Autowired
+    private UtenteService utenteService;
 
-    public UtenteController(UtenteService utenteService) {
-        this.utenteService = utenteService;
-    }
+    @Autowired
+    private UtenteRepository utenteRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+//    public UtenteController(UtenteService utenteService) {
+//        this.utenteService = utenteService;
+//    }
 
     // GET ALL
     @GetMapping
