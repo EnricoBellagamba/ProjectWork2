@@ -60,7 +60,7 @@ public class UtenteController {
     // DELETE
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUtente(@PathVariable Long id) {
-        utenteService.deleteUtente(id);
+            utenteService.deleteUtente(id);
         return ResponseEntity.noContent().build();
     }
 }

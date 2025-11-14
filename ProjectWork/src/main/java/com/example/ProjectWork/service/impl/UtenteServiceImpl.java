@@ -26,8 +26,7 @@ public class UtenteServiceImpl implements UtenteService {
 
     @Override
     public Utente getUtenteById(Long id) {
-        return utenteRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Utente non trovato con ID: " + id));
+        return utenteRepository.findById(id).orElseThrow(() -> new RuntimeException("Utente non trovato con ID: " + id));
     }
 
     @Override
