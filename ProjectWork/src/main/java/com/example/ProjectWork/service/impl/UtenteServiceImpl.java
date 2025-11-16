@@ -42,6 +42,11 @@ public class UtenteServiceImpl implements UtenteService {
 
     @Override
     public Utente updateUtente(Long id, Utente utente) {
+        // Cripta la password solo se è stata fornita
+        if (utente.getPasswordHash() != null && !utente.getPasswordHash().isBlank()) {
+            String hashedPassword = passwordEncoder.encode(utente.getPasswordHash());
+            utente.setPasswordHash(hashedPassword);
+        }
         Utente existing = this.getUtenteById(id);
 
         existing.setNome(utente.getNome());
