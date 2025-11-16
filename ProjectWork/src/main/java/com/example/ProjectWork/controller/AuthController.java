@@ -7,6 +7,7 @@ import com.example.ProjectWork.exception.PasswordErrataException;
 import com.example.ProjectWork.exception.RuoloNonValidoException;
 import com.example.ProjectWork.exception.UtenteNonTrovatoException;
 import com.example.ProjectWork.service.AuthService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/auth")
 public class AuthController {
 
+    @Autowired
     private final AuthService authService;
 
     public AuthController(AuthService authService) {
@@ -39,9 +41,11 @@ public class AuthController {
             LoginResponse resp = authService.login(req);
             return ResponseEntity.ok(resp);
         } catch (UtenteNonTrovatoException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("UTENTE_NON_TROVATO");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("UTENTE_NON_TROVATO");
         } catch (PasswordErrataException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("PASSWORD_ERRATA");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("PASSWORD_ERRATA");
         }
     }
 }

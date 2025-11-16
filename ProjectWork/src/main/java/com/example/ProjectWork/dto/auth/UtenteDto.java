@@ -31,5 +31,91 @@ public class UtenteDto {
         return dto;
     }
 
-    // getter e setter
+    public Long getIdUtente() {
+        return idUtente;
+    }
+
+    public void setIdUtente(Long idUtente) {
+        this.idUtente = idUtente;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public String getCognome() {
+        return cognome;
+    }
+
+    public void setCognome(String cognome) {
+        this.cognome = cognome;
+    }
+
+    public String getRuolo() {
+        return ruolo;
+    }
+
+    public void setRuolo(String ruolo) {
+        this.ruolo = ruolo;
+    }
+
+    public String getDataNascita() {
+        return dataNascita;
+    }
+
+    public void setDataNascita(String dataNascita) {
+        this.dataNascita = dataNascita;
+    }
+
+    public String getTelefono() {
+        return telefono;
+    }
+
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
+    }
+
+    public String getCitta() {
+        return citta;
+    }
+
+    public void setCitta(String citta) {
+        this.citta = citta;
+    }
+
+    public String getLingua() {
+        return lingua;
+    }
+
+    public void setLingua(String lingua) {
+        this.lingua = lingua;
+    }
+
+    public boolean isConsensoPrivacy() {
+        return consensoPrivacy;
+    }
+
+    public void setConsensoPrivacy(boolean consensoPrivacy) {
+        this.consensoPrivacy = consensoPrivacy;
+    }
+
+    public String getCvUrl() {
+        return cvUrl;
+    }
+
+    public void setCvUrl(String cvUrl) {
+        this.cvUrl = cvUrl;
+    }
 }
