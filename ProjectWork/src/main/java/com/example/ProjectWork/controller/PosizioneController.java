@@ -25,8 +25,7 @@ public class PosizioneController {
 
     @GetMapping
     public ResponseEntity<List<Posizione>> findAll() {
-        List<Posizione> posizioni = posizioneService.getAllPosizioni();
-        return ResponseEntity.ok(posizioni);
+        return ResponseEntity.ok(posizioneService.getAllPosizioni());
     }
 
     @GetMapping("/topquattro")
@@ -36,8 +35,7 @@ public class PosizioneController {
 
     @PostMapping("/nuova")
     public ResponseEntity<Posizione> save(@RequestBody Posizione posizione) {
-        Posizione newPosizione = posizioneService.createPosizione(posizione);
-        return ResponseEntity.ok(newPosizione);
+        return ResponseEntity.ok(posizioneService.createPosizione(posizione));
     }
 
     @DeleteMapping("/{id}")
