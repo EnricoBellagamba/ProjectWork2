@@ -3,9 +3,11 @@ package com.example.ProjectWork.service.impl;
 import com.example.ProjectWork.model.Candidato;
 import com.example.ProjectWork.repository.CandidatoRepository;
 import com.example.ProjectWork.service.CandidatoService;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class CandidatoServiceImpl implements CandidatoService {
 
     private final CandidatoRepository candidatoRepository;

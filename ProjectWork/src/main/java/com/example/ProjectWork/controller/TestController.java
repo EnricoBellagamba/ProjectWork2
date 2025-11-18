@@ -32,7 +32,7 @@ public class TestController {
 
     @PostMapping
     public ResponseEntity<Test> createTest(@RequestBody Test test) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(test);
+        return ResponseEntity.status(HttpStatus.CREATED).body(testService.createTest(test));
     }
 
     @PutMapping("/{id}")
