@@ -8,6 +8,8 @@ import jakarta.validation.constraints.Pattern;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "UTENTE", schema = "dbo")
@@ -63,6 +65,18 @@ public class Utente {
     @JoinColumn(name = "idRuolo")
     @JsonBackReference
     private Ruolo idRuolo;
+
+    @ManyToMany
+    @JoinTable(
+            name = "UTENTE_POSIZIONE_PREFERITA",
+            joinColumns = @JoinColumn(name = "idUtente"),
+            inverseJoinColumns = @JoinColumn(name = "idPosizione")
+    )
+    private List<Posizione> posizioniPreferite = new ArrayList<>();
+
+
+
+    //GETTER E SETTER -----------------------------------------------------------------------------------------------
 
     public Long getIdUtente() {
         return idUtente;
@@ -174,5 +188,13 @@ public class Utente {
 
     public void setIdRuolo(Ruolo idRuolo) {
         this.idRuolo = idRuolo;
+    }
+
+    public List<Posizione> getPosizioniPreferite() {
+        return posizioniPreferite;
+    }
+
+    public void setPosizioniPreferite(List<Posizione> posizioniPreferite) {
+        this.posizioniPreferite = posizioniPreferite;
     }
 }

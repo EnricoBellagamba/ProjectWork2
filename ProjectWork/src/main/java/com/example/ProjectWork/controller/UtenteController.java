@@ -63,5 +63,15 @@ public class UtenteController {
             utenteService.deleteUtente(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/{idUtente}/preferiti/{idPosizione}")
+    public ResponseEntity<?> aggiungiPosizionePreferita(
+            @PathVariable Long idUtente,
+            @PathVariable Long idPosizione) {
+
+        utenteService.aggiungiPosizionePreferita(idUtente, idPosizione);
+        return ResponseEntity.ok().build();
+    }
+
 }
 

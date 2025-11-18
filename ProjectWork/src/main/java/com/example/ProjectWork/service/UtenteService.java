@@ -10,4 +10,5 @@ public interface UtenteService {
     Utente createUtente(Utente utente);
     Utente updateUtente(Long id, Utente utente);
     void deleteUtente(Long id);
+    void aggiungiPosizionePreferita(Long idUtente, Long idPosizione);
 }
