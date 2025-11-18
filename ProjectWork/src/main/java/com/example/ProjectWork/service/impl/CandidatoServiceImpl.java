@@ -38,4 +38,15 @@ public class CandidatoServiceImpl implements CandidatoService {
         return candidatoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Posizione non trovato con ID: " + id));
     }
+
+    @Override
+    public Candidato updateCandidato(Long id, Candidato candidato) {
+
+        Candidato candidatoEsistente = candidatoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Candidato non trovato con ID: " + id));
+
+        candidatoEsistente.setActive(candidato.getActive());
+
+        return candidatoRepository.save(candidatoEsistente);
+    }
 }

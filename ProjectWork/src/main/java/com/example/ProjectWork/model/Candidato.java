@@ -2,7 +2,6 @@ package com.example.ProjectWork.model;
 
 import jakarta.persistence.*;
 
-
 @Entity
 @Table(name = "CANDIDATO", schema = "dbo")
 public class Candidato {
@@ -19,4 +18,27 @@ public class Candidato {
     private Boolean isActive;
 
 
+    public Long getIdCandidato() {
+        return idCandidato;
+    }
+
+    public void setIdCandidato(Long idCandidato) {
+        this.idCandidato = idCandidato;
+    }
+
+    public Utente getIdUtente() {
+        return idUtente;
+    }
+
+    public void setIdUtente(Utente idUtente) {
+        this.idUtente = idUtente;
+    }
+
+    public Boolean getActive() {
+        return isActive;
+    }
+
+    public void setActive(Boolean active) {
+        isActive = active;
+    }
 }

@@ -10,5 +10,6 @@ public interface CandidatoService {
     Candidato createCandidato(Candidato candidato);
     void deleteCandidato(Long id);
     Candidato getCandidatoById (Long id);
+    Candidato updateCandidato(Long id, Candidato candidato);
 
 }

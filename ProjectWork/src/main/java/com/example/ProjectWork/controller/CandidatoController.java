@@ -14,13 +14,12 @@ import java.util.List;
 @RequestMapping("/api/candidato")
 public class CandidatoController {
 
-    @Autowired
-    private CandidatoService candidatoService;
-    @Autowired
-    private CandidatoRepository candidatoRepository;
+    private final CandidatoService candidatoService;
+    private final CandidatoRepository candidatoRepository;
 
-    public CandidatoController(CandidatoService candidatoService) {
+    public CandidatoController(CandidatoService candidatoService, CandidatoRepository candidatoRepository) {
         this.candidatoService = candidatoService;
+        this.candidatoRepository = candidatoRepository;
     }
 
     @GetMapping
@@ -38,6 +37,20 @@ public class CandidatoController {
     public ResponseEntity<Candidato> createCandidato(@RequestBody Candidato candidato) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(candidatoService.createCandidato(candidato));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Candidato> updateCandidato(
+            @PathVariable Long id,
+            @RequestBody Candidato candidato) {
+
+        return ResponseEntity.ok(candidatoService.updateCandidato(id, candidato));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteCandidato(@PathVariable Long id) {
+        candidatoService.deleteCandidato(id);
+        return ResponseEntity.noContent().build();
     }
 
 }
