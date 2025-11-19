@@ -9,8 +9,13 @@ import com.example.ProjectWork.exception.UtenteNonTrovatoException;
 import com.example.ProjectWork.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -23,15 +28,24 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest req) {
+    @PostMapping(
+            value = "/register",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public ResponseEntity<?> register(
+            @RequestPart("payload") RegisterRequest req,
+            @RequestPart(value = "cv" , required = false)MultipartFile cvFile
+            ) {
         try {
-            LoginResponse resp = authService.register(req);
+            LoginResponse resp = authService.register(req,cvFile);
             return ResponseEntity.ok(resp);
         } catch (EmailGiaRegistrataException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("EMAIL_GIA_REGISTRATA");
         } catch (RuoloNonValidoException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("RUOLO_NON_VALIDO");
+        }  catch (IOException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("message", "ERRORE_SALVATAGGIO_CV"));
         }
     }
 
