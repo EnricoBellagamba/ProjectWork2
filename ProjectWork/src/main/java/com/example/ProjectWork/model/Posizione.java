@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.validation.constraints.Min;
+import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Table(name = "POSIZIONE", schema = "dbo")
@@ -32,7 +33,7 @@ public class Posizione {
     private Double RAL;
 
     @Column(nullable = false)
-    @Min(value=0)
+    @Min(value = 0)
     private Long candidatureRicevute;
 
     @Column
@@ -55,6 +56,14 @@ public class Posizione {
 
     @ManyToMany(mappedBy = "posizioniPreferite")
     private List<Utente> utentiCheHannoPreferito = new ArrayList<>();
+
+
+    @PrePersist
+    protected void onCreate() {
+        if (this.pubblicataAt == null) {
+            this.pubblicataAt = LocalDate.now();
+        }
+    }
 
 
 
