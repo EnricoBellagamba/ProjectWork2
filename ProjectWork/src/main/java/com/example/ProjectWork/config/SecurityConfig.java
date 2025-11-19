@@ -21,7 +21,13 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+                        // le API di autenticazione devono essere pubbliche
+                        .requestMatchers("/api/auth/**").permitAll()
+                        // i cv devono essere scaricabili da tutti
+                        .requestMatchers("/uploads/**").permitAll()
+                        // le API sugli utenti richiedono login
                         .requestMatchers("/api/utenti/**").authenticated()
+                        // tutto il resto per ora lo lasciamo aperto
                         .anyRequest().permitAll()
                 )
                 .httpBasic(withDefaults());
