@@ -11,5 +11,4 @@ public interface TestService {
     Test createTest(Test newTest);
     Test updateTest(Long id, Test test);
     void deleteTest(Long id);
-
 }

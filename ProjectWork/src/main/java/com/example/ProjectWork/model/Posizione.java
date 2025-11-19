@@ -3,6 +3,9 @@ package com.example.ProjectWork.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.validation.constraints.Min;
 
 @Entity
@@ -49,6 +52,13 @@ public class Posizione {
     @ManyToOne
     @JoinColumn(name = "idSettore")
     private Settore idSettore;
+
+    @ManyToMany(mappedBy = "posizioniPreferite")
+    private List<Utente> utentiCheHannoPreferito = new ArrayList<>();
+
+
+
+    //GETTER E SETTER -----------------------------------------------------------------------------------------------
 
     public Long getIdPosizione() {
         return idPosizione;
@@ -144,6 +154,14 @@ public class Posizione {
 
     public void setIdSettore(Settore idSettore) {
         this.idSettore = idSettore;
+    }
+
+    public List<Utente> getUtentiCheHannoPreferito() {
+        return utentiCheHannoPreferito;
+    }
+
+    public void setUtentiCheHannoPreferito(List<Utente> utentiCheHannoPreferito) {
+        this.utentiCheHannoPreferito = utentiCheHannoPreferito;
     }
 }
 

@@ -1,6 +1,8 @@
 package com.example.ProjectWork.service.impl;
 
+import com.example.ProjectWork.model.Posizione;
 import com.example.ProjectWork.model.Utente;
+import com.example.ProjectWork.repository.PosizioneRepository;
 import com.example.ProjectWork.repository.UtenteRepository;
 import com.example.ProjectWork.service.UtenteService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -13,10 +15,13 @@ public class UtenteServiceImpl implements UtenteService {
 
     private final UtenteRepository utenteRepository;
     private final PasswordEncoder passwordEncoder;
+    private final PosizioneRepository posizioneRepository;
 
-    public UtenteServiceImpl(UtenteRepository utenteRepository, PasswordEncoder passwordEncoder) {
+    public UtenteServiceImpl(UtenteRepository utenteRepository, PasswordEncoder passwordEncoder,
+                             PosizioneRepository posizioneRepository) {
         this.utenteRepository = utenteRepository;
         this.passwordEncoder = passwordEncoder;
+        this.posizioneRepository = posizioneRepository;
     }
 
     @Override
@@ -77,4 +82,16 @@ public class UtenteServiceImpl implements UtenteService {
         // Confronta la password fornita con quella salvata
         return passwordEncoder.matches(rawPassword, hashedPassword);
     }
+
+    @Override
+    public void aggiungiPosizionePreferita(Long idUtente, Long idPosizione) {
+        Utente utente = utenteRepository.findById(idUtente)
+                .orElseThrow(() -> new RuntimeException("Utente non trovato"));
+        Posizione posizione = posizioneRepository.findById(idPosizione)
+                .orElseThrow(() -> new RuntimeException("Posizione non trovata"));
+
+        utente.getPosizioniPreferite().add(posizione);
+        utenteRepository.save(utente);
+    }
+
 }
