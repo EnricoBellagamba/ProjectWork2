@@ -45,6 +45,8 @@ public class UtenteServiceImpl implements UtenteService {
         return utenteRepository.save(utente);
     }
 
+    /** Il ruolo non può essere cambiato da nessuno se non dall'admin del software (NO HR E NO USER) */
+
     @Override
     public Utente updateUtente(Long id, Utente utente) {
         // Cripta la password solo se è stata fornita

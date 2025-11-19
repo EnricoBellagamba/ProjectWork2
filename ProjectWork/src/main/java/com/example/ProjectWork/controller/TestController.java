@@ -49,4 +49,10 @@ public class TestController {
         return ResponseEntity.noContent().build();
     }
 
+    //TODO: Creo il test,
+    // lo seleziono,
+    // lo elimino,
+    // lo aggiorno (da guardare meglio),
+    // prendo tutti i test per (categoria, risultato su una posizione)
+
 }

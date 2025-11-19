@@ -49,4 +49,12 @@ public class CandidatoController {
         return ResponseEntity.noContent().build();
     }
 
+    //TODO:
+    // findAll, serve per trovare tutti i candidati per una determinata posizione
+    // getCandidatoByID il singolo canidato per candidatura (magari per vederne il dettaglio e scaricarne in CV)
+    // createCandidato deve avvenire insieme alla creazione della candidatura
+    // l'update cambia solamente il suo stato (attivo o no) in base allo stato
+    // deleteCandidato facoltativa, alla fine dipende lo possiamo fare cascade nel momento in cui una candidatura viene eliminata
+    // PER la candidatura utilizziamo questa classe / un altra classe?
+    // CREAZIONE, MODIFICA (bella peso per il conto dei vari candidati), DELETE
 }
