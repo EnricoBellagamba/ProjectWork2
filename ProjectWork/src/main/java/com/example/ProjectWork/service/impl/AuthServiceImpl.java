@@ -3,7 +3,7 @@ package com.example.ProjectWork.service.impl;
 import com.example.ProjectWork.dto.auth.LoginRequest;
 import com.example.ProjectWork.dto.auth.LoginResponse;
 import com.example.ProjectWork.dto.auth.RegisterRequest;
-import com.example.ProjectWork.dto.auth.UtenteDto;
+import com.example.ProjectWork.dto.UtenteDto;
 import com.example.ProjectWork.exception.EmailGiaRegistrataException;
 import com.example.ProjectWork.exception.PasswordErrataException;
 import com.example.ProjectWork.exception.RuoloNonValidoException;

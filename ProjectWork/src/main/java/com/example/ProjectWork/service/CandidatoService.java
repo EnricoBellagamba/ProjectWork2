@@ -1,5 +1,6 @@
 package com.example.ProjectWork.service;
 
+import com.example.ProjectWork.dto.CandidatoConPosizioneDTO;
 import com.example.ProjectWork.model.Candidato;
 
 import java.util.List;
@@ -11,5 +12,8 @@ public interface CandidatoService {
     void deleteCandidato(Long id);
     Candidato getCandidatoById (Long id);
     Candidato updateCandidato(Long id, Candidato candidato);
+
+    List<CandidatoConPosizioneDTO> getCandidatiByPosizione(String titolo);
+
 
 }

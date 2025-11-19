@@ -1,5 +1,6 @@
 package com.example.ProjectWork.controller;
 
+import com.example.ProjectWork.dto.CandidatoConPosizioneDTO;
 import com.example.ProjectWork.model.Candidato;
 import com.example.ProjectWork.service.CandidatoService;
 import org.springframework.http.HttpStatus;
@@ -49,8 +50,13 @@ public class CandidatoController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/posizione/{titolo}")
+    public List<CandidatoConPosizioneDTO> findCandidatiByPosizione(@PathVariable String titolo) {
+        return candidatoService.getCandidatiByPosizione(titolo);
+    }
+
     //TODO:
-    // findAll, serve per trovare tutti i candidati per una determinata posizione
+    // findAll, serve per trovare tutti i candidati per una determinata posizione  <- FATTO ->
     // getCandidatoByID il singolo canidato per candidatura (magari per vederne il dettaglio e scaricarne in CV)
     // createCandidato deve avvenire insieme alla creazione della candidatura
     // l'update cambia solamente il suo stato (attivo o no) in base allo stato

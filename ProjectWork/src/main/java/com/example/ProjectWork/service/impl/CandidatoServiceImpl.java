@@ -1,5 +1,6 @@
 package com.example.ProjectWork.service.impl;
 
+import com.example.ProjectWork.dto.CandidatoConPosizioneDTO;
 import com.example.ProjectWork.model.Candidato;
 import com.example.ProjectWork.repository.CandidatoRepository;
 import com.example.ProjectWork.service.CandidatoService;
@@ -50,5 +51,10 @@ public class CandidatoServiceImpl implements CandidatoService {
         candidatoEsistente.setActive(candidato.getActive());
 
         return candidatoRepository.save(candidatoEsistente);
+    }
+
+    @Override
+    public List<CandidatoConPosizioneDTO> getCandidatiByPosizione(String titolo) {
+        return candidatoRepository.findAllByPosizioneDto(titolo);
     }
 }

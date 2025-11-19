@@ -1,4 +1,4 @@
-package com.example.ProjectWork.dto.auth;
+package com.example.ProjectWork.dto;
 
 import com.example.ProjectWork.model.Utente;
 

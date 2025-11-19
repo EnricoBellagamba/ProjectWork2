@@ -1,7 +1,7 @@
 package com.example.ProjectWork.dto.auth;
 
 
-
+import com.example.ProjectWork.dto.UtenteDto;
 
 public class LoginResponse{
 private String accessToken;
