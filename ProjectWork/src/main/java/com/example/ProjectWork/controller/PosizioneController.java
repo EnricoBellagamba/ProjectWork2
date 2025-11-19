@@ -51,5 +51,4 @@ public class PosizioneController {
         return ResponseEntity.ok(posizioneService.getPosizioneById(id));
     }
 
-
 }
