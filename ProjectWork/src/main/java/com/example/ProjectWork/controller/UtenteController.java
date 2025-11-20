@@ -26,9 +26,6 @@ public class UtenteController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-//    public UtenteController(UtenteService utenteService) {
-//        this.utenteService = utenteService;
-//    }
 
     // GET ALL
     @GetMapping

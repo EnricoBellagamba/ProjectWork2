@@ -13,14 +13,13 @@ import java.util.List;
 @RequestMapping("/api/posizioni")
 public class PosizioneController {
 
-    @Autowired
     private final PosizioneService posizioneService;
 
-    @Autowired
-    private PosizioneRepository posizioneRepository;
+    private final PosizioneRepository posizioneRepository;
 
-    public PosizioneController(PosizioneService posizioneService) {
+    public PosizioneController(PosizioneService posizioneService, PosizioneRepository posizioneRepository) {
         this.posizioneService = posizioneService;
+        this.posizioneRepository = posizioneRepository;
     }
 
     @GetMapping

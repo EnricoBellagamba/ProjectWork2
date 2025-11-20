@@ -1,61 +1,55 @@
 package com.example.ProjectWork.config;
 
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
+import static org.springframework.security.config.Customizer.withDefaults;
+
 @Configuration
-@EnableWebSecurity
 public class SecurityConfig {
 
-    // ✅ Bean necessario per AuthServiceImpl
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
+    // Permessi di accesso a diversi endpoint in base al ruolo
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // niente csrf per le API REST
-                .csrf(AbstractHttpConfigurer::disable)
-                .cors(Customizer.withDefaults())
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
-
-                // QUI decidi cosa è pubblico
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/api/auth/login",
-                                "/api/auth/register",
-                                "/api/auth/refresh",
-                                "/api/health"
-                        ).permitAll()
-                        .anyRequest().authenticated()
+                        // le API di autenticazione devono essere pubbliche
+                        .requestMatchers("/api/auth/**").permitAll()
+                        // i cv devono essere scaricabili da tutti
+                        .requestMatchers("/uploads/**").permitAll()
+                        // le API sugli utenti richiedono login
+                        .requestMatchers("/api/utenti/**").authenticated()
+                        // tutto il resto per ora lo lasciamo aperto
+                        .anyRequest().permitAll()
                 )
-
-                // DISABILITA COMPLETAMENTE HTTP BASIC e formLogin
-                .httpBasic(AbstractHttpConfigurer::disable)
-                .formLogin(AbstractHttpConfigurer::disable)
-
-                // niente WWW-Authenticate: Basic → niente popup del browser
-                .exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, authException) -> {
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.setContentType("application/json");
-                    response.getWriter().write("{\"error\":\"Unauthorized\"}");
-                }));
-
-        // Se in futuro aggiungi un filtro JWT, lo inserirai qui con .addFilterBefore(...)
+                .httpBasic(withDefaults());
 
         return http.build();
+    }
+
+
+    @Bean
+    public InMemoryUserDetailsManager userDetailsService(PasswordEncoder passwordEncoder) {
+        UserDetails admin = User.withUsername("admin")
+                .password(passwordEncoder.encode("admin123"))
+                .roles("ADMIN")
+                .build();
+
+        return new InMemoryUserDetailsManager(admin);
+    }
+
+
+    // Definizione PasswordEncoder per criptare le password
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }
