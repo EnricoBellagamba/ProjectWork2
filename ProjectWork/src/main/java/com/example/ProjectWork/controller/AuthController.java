@@ -1,4 +1,5 @@
 package com.example.ProjectWork.controller;
+
 import com.example.ProjectWork.dto.auth.LoginRequest;
 import com.example.ProjectWork.dto.auth.LoginResponse;
 import com.example.ProjectWork.dto.auth.RegisterRequest;
@@ -7,7 +8,7 @@ import com.example.ProjectWork.exception.PasswordErrataException;
 import com.example.ProjectWork.exception.RuoloNonValidoException;
 import com.example.ProjectWork.exception.UtenteNonTrovatoException;
 import com.example.ProjectWork.service.AuthService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,9 +22,9 @@ import java.util.Map;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    @Autowired
     private final AuthService authService;
 
+    // constructor injection pulito
     public AuthController(AuthService authService) {
         this.authService = authService;
     }
@@ -33,24 +34,24 @@ public class AuthController {
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
     public ResponseEntity<?> register(
-            @RequestPart("payload") RegisterRequest req,
-            @RequestPart(value = "cv" , required = false)MultipartFile cvFile
-            ) {
+            @Valid @RequestPart("payload") RegisterRequest req,
+            @RequestPart(value = "cv", required = false) MultipartFile cvFile
+    ) {
         try {
-            LoginResponse resp = authService.register(req,cvFile);
+            LoginResponse resp = authService.register(req, cvFile);
             return ResponseEntity.ok(resp);
         } catch (EmailGiaRegistrataException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("EMAIL_GIA_REGISTRATA");
         } catch (RuoloNonValidoException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("RUOLO_NON_VALIDO");
-        }  catch (IOException ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("message", "ERRORE_SALVATAGGIO_CV"));
+        } catch (IOException ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "ERRORE_SALVATAGGIO_CV"));
         }
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest req) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest req) {
         try {
             LoginResponse resp = authService.login(req);
             return ResponseEntity.ok(resp);

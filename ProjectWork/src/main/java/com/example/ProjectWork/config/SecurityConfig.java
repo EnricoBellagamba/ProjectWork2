@@ -2,54 +2,61 @@ package com.example.ProjectWork.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import static org.springframework.security.config.Customizer.withDefaults;
+import java.util.List;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
-    // Permessi di accesso a diversi endpoint in base al ruolo
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
         http
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth
-                        // le API di autenticazione devono essere pubbliche
-                        .requestMatchers("/api/auth/**").permitAll()
-                        // i cv devono essere scaricabili da tutti
-                        .requestMatchers("/uploads/**").permitAll()
-                        // le API sugli utenti richiedono login
-                        .requestMatchers("/api/utenti/**").authenticated()
-                        // tutto il resto per ora lo lasciamo aperto
-                        .anyRequest().permitAll()
+                // niente CSRF per API REST
+                .csrf(AbstractHttpConfigurer::disable)
+                // CORS per Next.js su 3000
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                // stateless
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .httpBasic(withDefaults());
+                // DISABILITO HTTP BASIC E FORM LOGIN (niente popup)
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable)
+                // regole di autorizzazione
+                .authorizeHttpRequests(auth -> auth
+                        // login/registrazione liberi
+                        .requestMatchers("/api/auth/**").permitAll()
+                        // se vuoi accedere ai CV da browser
+                        .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
+                        // per ora tutto il resto libero (poi metteremo autenticazione JWT)
+                        .anyRequest().permitAll()
+                );
 
         return http.build();
     }
 
-
     @Bean
-    public InMemoryUserDetailsManager userDetailsService(PasswordEncoder passwordEncoder) {
-        UserDetails admin = User.withUsername("admin")
-                .password(passwordEncoder.encode("admin123"))
-                .roles("ADMIN")
-                .build();
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        // origine del frontend
+        config.setAllowedOrigins(List.of("http://localhost:3000"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowCredentials(true);
 
-        return new InMemoryUserDetailsManager(admin);
-    }
-
-
-    // Definizione PasswordEncoder per criptare le password
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
     }
 }

@@ -1,51 +1,42 @@
 package com.example.ProjectWork.dto.auth;
 
 public class RegisterRequest {
+
     private String email;
     private String password;
+
     private String nome;
     private String cognome;
+
+    // codice ruolo: es. "CANDIDATO" oppure "HR"
     private String ruolo;
+
+    // opzionali / anagrafica
+    private String telefono;
+    // in formato testo "yyyy-MM-dd" (verrà poi parsata in LocalDate nel service)
+    private String dataNascita;
+    private String citta;
+
+    // es. "it-IT", "en-US"...
+    private String lingua;
+
+    // privacy
     private boolean consensoPrivacy;
 
-    //in JSON mando dataNascita come stringa "2025-11-19", Spring la mappa tranquillamente su String; poi la convertiamo noi in LocalDate.
-    private String dataNascita;
-    private String telefono;
-    private String citta;
-    private String lingua;
-    private String cvUrl;        // lo mette il controller dopo aver salvato il fil
+    // URL del CV salvato sul file system
+    private String cvUrl;
 
-
-    public boolean isConsensoPrivacy() {
-        return consensoPrivacy;
+    public RegisterRequest() {
     }
 
-    public void setConsensoPrivacy(boolean consensoPrivacy) {
-        this.consensoPrivacy = consensoPrivacy;
+    // GETTER & SETTER
+
+    public String getEmail() {
+        return email;
     }
 
-    public String getRuolo() {
-        return ruolo;
-    }
-
-    public void setRuolo(String ruolo) {
-        this.ruolo = ruolo;
-    }
-
-    public String getCognome() {
-        return cognome;
-    }
-
-    public void setCognome(String cognome) {
-        this.cognome = cognome;
-    }
-
-    public String getNome() {
-        return nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getPassword() {
@@ -56,20 +47,28 @@ public class RegisterRequest {
         this.password = password;
     }
 
-    public String getEmail() {
-        return email;
+    public String getNome() {
+        return nome;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setNome(String nome) {
+        this.nome = nome;
     }
 
-    public String getDataNascita() {
-        return dataNascita;
+    public String getCognome() {
+        return cognome;
     }
 
-    public void setDataNascita(String dataNascita) {
-        this.dataNascita = dataNascita;
+    public void setCognome(String cognome) {
+        this.cognome = cognome;
+    }
+
+    public String getRuolo() {
+        return ruolo;
+    }
+
+    public void setRuolo(String ruolo) {
+        this.ruolo = ruolo;
     }
 
     public String getTelefono() {
@@ -78,6 +77,14 @@ public class RegisterRequest {
 
     public void setTelefono(String telefono) {
         this.telefono = telefono;
+    }
+
+    public String getDataNascita() {
+        return dataNascita;
+    }
+
+    public void setDataNascita(String dataNascita) {
+        this.dataNascita = dataNascita;
     }
 
     public String getCitta() {
@@ -94,6 +101,14 @@ public class RegisterRequest {
 
     public void setLingua(String lingua) {
         this.lingua = lingua;
+    }
+
+    public boolean isConsensoPrivacy() {
+        return consensoPrivacy;
+    }
+
+    public void setConsensoPrivacy(boolean consensoPrivacy) {
+        this.consensoPrivacy = consensoPrivacy;
     }
 
     public String getCvUrl() {

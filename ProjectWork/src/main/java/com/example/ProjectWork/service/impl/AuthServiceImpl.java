@@ -33,14 +33,23 @@ public class AuthServiceImpl implements AuthService {
     private final RuoloRepository ruoloRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public AuthServiceImpl(UtenteRepository utenteRepository, RuoloRepository ruoloRepository, PasswordEncoder passwordEncoder) {
+    public AuthServiceImpl(UtenteRepository utenteRepository,
+                           RuoloRepository ruoloRepository,
+                           PasswordEncoder passwordEncoder) {
         this.utenteRepository = utenteRepository;
         this.ruoloRepository = ruoloRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
     @Override
-    public LoginResponse register(RegisterRequest req ,MultipartFile cvFile) throws IOException  {
+    public LoginResponse register(RegisterRequest req, MultipartFile cvFile) throws IOException {
+
+        if (req == null) {
+            throw new IllegalArgumentException("Dati di registrazione mancanti.");
+        }
+        if (req.getPassword() == null || req.getPassword().isBlank()) {
+            throw new IllegalArgumentException("La password non può essere nulla o vuota.");
+        }
 
         if (utenteRepository.existsByEmail(req.getEmail())) {
             throw new EmailGiaRegistrataException();
@@ -58,7 +67,6 @@ public class AuthServiceImpl implements AuthService {
         Utente u = new Utente();
         u.setEmail(req.getEmail());
         u.setPasswordHash(passwordEncoder.encode(req.getPassword()));
-        u.setCvHash(passwordEncoder.encode(req.getCvUrl()));
         u.setNome(req.getNome());
         u.setCognome(req.getCognome());
         u.setConsensoPrivacy(req.isConsensoPrivacy());
@@ -74,6 +82,7 @@ public class AuthServiceImpl implements AuthService {
                 );
             }
         }
+
         u.setTelefono(req.getTelefono());
         u.setCitta(req.getCitta());
 
@@ -82,9 +91,10 @@ public class AuthServiceImpl implements AuthService {
                 ? req.getLingua()
                 : "it-IT";
         u.setLingua(lingua);
-        u.setConsensoPrivacy(req.isConsensoPrivacy());
-        // se stai passando un URL del CV già caricato
+
+        // URL del CV (non ha senso hasharla)
         u.setCvUrl(req.getCvUrl());
+
         // lastLogin: per ora puoi inizializzarlo alla registrazione
         u.setLastLogin(Instant.now());
 
@@ -135,4 +145,3 @@ public class AuthServiceImpl implements AuthService {
         return new LoginResponse("dummy-access-token", "dummy-refresh-token", userDto);
     }
 }
-
