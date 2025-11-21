@@ -9,6 +9,7 @@ import com.example.ProjectWork.model.Ruolo;
 import com.example.ProjectWork.model.Utente;
 import com.example.ProjectWork.repository.RuoloRepository;
 import com.example.ProjectWork.repository.UtenteRepository;
+import com.example.ProjectWork.security.JwtService;
 import com.example.ProjectWork.service.AuthService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -32,24 +33,24 @@ public class AuthServiceImpl implements AuthService {
     private final UtenteRepository utenteRepository;
     private final RuoloRepository ruoloRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;   // <<--- AGGIUNTO
 
     public AuthServiceImpl(UtenteRepository utenteRepository,
                            RuoloRepository ruoloRepository,
-                           PasswordEncoder passwordEncoder) {
+                           PasswordEncoder passwordEncoder,
+                           JwtService jwtService) { // <<--- AGGIUNTO
         this.utenteRepository = utenteRepository;
         this.ruoloRepository = ruoloRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService; // <<--- AGGIUNTO
     }
 
     @Override
     public LoginResponse register(RegisterRequest req, MultipartFile cvFile) throws IOException {
 
-        if (req == null) {
-            throw new IllegalArgumentException("Dati di registrazione mancanti.");
-        }
-        if (req.getPassword() == null || req.getPassword().isBlank()) {
+        if (req == null) throw new IllegalArgumentException("Dati di registrazione mancanti.");
+        if (req.getPassword() == null || req.getPassword().isBlank())
             throw new IllegalArgumentException("La password non può essere nulla o vuota.");
-        }
 
         if (utenteRepository.existsByEmail(req.getEmail())) {
             throw new EmailGiaRegistrataException();
@@ -58,7 +59,7 @@ public class AuthServiceImpl implements AuthService {
         Ruolo ruolo = ruoloRepository.findByCodice(req.getRuolo())
                 .orElseThrow(RuoloNonValidoException::new);
 
-        // Se c'è il CV, lo salvo e metto la URL dentro al DTO
+        // CV
         if (cvFile != null && !cvFile.isEmpty()) {
             String cvUrl = salvaCvSuFileSystem(cvFile);
             req.setCvUrl(cvUrl);
@@ -72,10 +73,10 @@ public class AuthServiceImpl implements AuthService {
         u.setConsensoPrivacy(req.isConsensoPrivacy());
         u.setIdRuolo(ruolo);
 
-        // dataNascita: la convertiamo solo se non è vuota
+        // Data di nascita
         if (req.getDataNascita() != null && !req.getDataNascita().isBlank()) {
             try {
-                u.setDataNascita(LocalDate.parse(req.getDataNascita())); // formato ISO: yyyy-MM-dd
+                u.setDataNascita(LocalDate.parse(req.getDataNascita()));
             } catch (DateTimeParseException e) {
                 throw new DataNascitaNonValidaException(
                         "Formato dataNascita non valido. Usa il formato yyyy-MM-dd."
@@ -85,30 +86,25 @@ public class AuthServiceImpl implements AuthService {
 
         u.setTelefono(req.getTelefono());
         u.setCitta(req.getCitta());
+        u.setLingua((req.getLingua() != null && !req.getLingua().isBlank()) ? req.getLingua() : "it-IT");
 
-        // lingua: se non viene valorizzata dal frontend, usiamo it-IT
-        String lingua = (req.getLingua() != null && !req.getLingua().isBlank())
-                ? req.getLingua()
-                : "it-IT";
-        u.setLingua(lingua);
-
-        // URL del CV (non ha senso hasharla)
         u.setCvUrl(req.getCvUrl());
-
-        // lastLogin: per ora puoi inizializzarlo alla registrazione
         u.setLastLogin(Instant.now());
 
         Utente saved = utenteRepository.save(u);
 
         UtenteDto userDto = UtenteDto.fromEntity(saved);
-        return new LoginResponse("dummy-access-token", "dummy-refresh-token", userDto);
+
+        // GENERO I TOKEN REALI
+        String accessToken = jwtService.generateAccessToken(saved);
+        String refreshToken = jwtService.generateRefreshToken(saved);
+
+        return new LoginResponse(accessToken, refreshToken, userDto);
     }
 
-    //  Qui tengo la logica di salvataggio file
     private String salvaCvSuFileSystem(MultipartFile cvFile) throws IOException {
-        if (cvFile == null || cvFile.isEmpty()) {
-            return null;
-        }
+        if (cvFile == null || cvFile.isEmpty()) return null;
+
         Path uploadDir = Paths.get("uploads", "cv");
         Files.createDirectories(uploadDir);
 
@@ -131,6 +127,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public LoginResponse login(LoginRequest req) {
+
         Utente utente = utenteRepository.findByEmail(req.getEmail())
                 .orElseThrow(UtenteNonTrovatoException::new);
 
@@ -141,7 +138,12 @@ public class AuthServiceImpl implements AuthService {
         utente.setLastLogin(Instant.now());
         utenteRepository.save(utente);
 
-        UtenteDto userDto = UtenteDto.fromEntity(utente);
-        return new LoginResponse("dummy-access-token", "dummy-refresh-token", userDto);
+        UtenteDto dto = UtenteDto.fromEntity(utente);
+
+        // TOKEN REALI
+        String accessToken = jwtService.generateAccessToken(utente);
+        String refreshToken = jwtService.generateRefreshToken(utente);
+
+        return new LoginResponse(accessToken, refreshToken, dto);
     }
 }
