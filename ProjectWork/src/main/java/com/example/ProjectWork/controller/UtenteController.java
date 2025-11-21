@@ -1,6 +1,6 @@
 package com.example.ProjectWork.controller;
 
-import com.example.ProjectWork.config.SecurityConfig;
+
 import com.example.ProjectWork.model.Utente;
 import com.example.ProjectWork.repository.UtenteRepository;
 import com.example.ProjectWork.service.UtenteService;
