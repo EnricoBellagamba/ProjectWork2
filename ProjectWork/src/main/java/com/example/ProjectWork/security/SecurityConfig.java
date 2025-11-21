@@ -9,6 +9,10 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -19,6 +23,16 @@ public class SecurityConfig {
 
     public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
         this.jwtAuthFilter = jwtAuthFilter;
+    }
+
+    @Bean
+    public InMemoryUserDetailsManager userDetailsService(PasswordEncoder passwordEncoder) {
+        UserDetails admin = User.withUsername("admin")
+                .password(passwordEncoder.encode("admin123"))
+                .roles("ADMIN")
+                .build();
+
+        return new InMemoryUserDetailsManager(admin);
     }
 
     @Bean
@@ -35,6 +49,9 @@ public class SecurityConfig {
                         // ENDPOINT PUBBLICI
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/", "/error", "/favicon.ico").permitAll()
+
+                        // ADMIN DEV = può fare tutto
+                        .requestMatchers("/api/**").hasRole("ADMIN")
 
                         // SOLO HR
                         .requestMatchers("/api/hr/**").hasRole("HR")
