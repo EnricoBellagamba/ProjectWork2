@@ -12,6 +12,12 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.cors.CorsConfigurationSource;
+
+import java.util.List;
+
 @Configuration
 public class SecurityConfig {
 
@@ -26,33 +32,38 @@ public class SecurityConfig {
 
         http
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.disable())
-
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests(auth -> auth
-                        // ENDPOINT PUBBLICI
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/", "/error", "/favicon.ico").permitAll()
-
-                        // SOLO HR
                         .requestMatchers("/api/hr/**").hasRole("HR")
-
-                        // SOLO CANDIDATO
                         .requestMatchers("/api/candidati/**").hasRole("CANDIDATO")
-
-                        // QUALSIASI COSA NON MATCHATA PRIMA → RICHIEDE LOGIN
                         .anyRequest().authenticated()
                 )
 
-                // Aggiungiamo il filtro JWT PRIMA del filtro UsernamePasswordAuthenticationFilter
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-    // Necessario se un domani usi AuthenticationManager
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+
+        config.setAllowedOrigins(List.of("http://localhost:3000"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        config.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
+
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
