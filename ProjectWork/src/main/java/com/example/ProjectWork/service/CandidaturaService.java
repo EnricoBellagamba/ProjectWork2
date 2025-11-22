@@ -10,6 +10,5 @@ List<Candidatura> getAllCandidature();
 Candidatura createCandidatura(Candidatura candidatura);
 void deleteCandidatura(Long id);
 Candidatura getCandidaturaById(Long id);
-Candidatura updateCandidatura(Long id, Candidatura candidatura);
 
 }
