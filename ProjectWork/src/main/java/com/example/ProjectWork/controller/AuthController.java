@@ -59,8 +59,9 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("UTENTE_NON_TROVATO");
         } catch (PasswordErrataException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("PASSWORD_ERRATA");
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "CREDENZIALI_NON_VALIDE"));
         }
     }
 }
