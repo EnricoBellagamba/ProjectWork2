@@ -1,9 +1,6 @@
 package com.example.ProjectWork.service.impl;
 
-import com.example.ProjectWork.model.Candidato;
-import com.example.ProjectWork.model.Candidatura;
-import com.example.ProjectWork.model.Posizione;
-import com.example.ProjectWork.model.StatoCandidatura;
+import com.example.ProjectWork.model.*;
 import com.example.ProjectWork.repository.CandidatoRepository;
 import com.example.ProjectWork.repository.CandidaturaRepository;
 import com.example.ProjectWork.repository.PosizioneRepository;
@@ -61,8 +58,8 @@ public class CandidaturaServiceImpl implements CandidaturaService {
     }
 
     @Override
-    public List<Candidatura> getCandidatureByCandidato(Long idCandidato) {
-        return candidaturaRepository.findByCandidato_IdCandidato(idCandidato);
+    public List<Candidatura> getCandidatureByUtente(Utente utente) {
+        return candidaturaRepository.findByCandidato_IdUtente(utente);
     }
 
     @Override

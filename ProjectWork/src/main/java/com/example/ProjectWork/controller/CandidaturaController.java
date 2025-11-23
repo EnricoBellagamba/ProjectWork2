@@ -49,16 +49,21 @@ public class CandidaturaController {
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Utente non trovato"));
 
-        // 2. Trovo il CANDIDATO legato a questo utente
-        Candidato candidato = candidatoRepository.findByIdUtente(utente)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST, "Profilo candidato non trovato"));
+        // 2. CERCO il profilo candidato per questo utente ,Se NON esiste, lo creo. Se esiste, lo riuso.
+        Candidato candidato =candidatoRepository.findByIdUtente(utente)
+                .orElseGet(() -> {
+                    Candidato nuovo = new Candidato();
+                    nuovo.setIdUtente(utente);
+                    nuovo.setActive(true);
+                    return candidatoRepository.save(nuovo);
+                });
 
-        // 3. Creo la candidatura usando idCandidato + idPosizione
-        Candidatura nuova =  candidaturaService.createCandidatura(
+        // Creo la candidatura per questa posizione usando SEMPRE lo stesso idCandidato
+        Candidatura nuova =candidaturaService.createCandidatura(
                 candidato.getIdCandidato(),
                 request.getIdPosizione()
         );
+
         return ResponseEntity.status(HttpStatus.CREATED).body(nuova);
     }
 
@@ -72,13 +77,8 @@ public class CandidaturaController {
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Utente non trovato"));
 
-        Candidato candidato = candidatoRepository.findByIdUtente(utente)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST, "Profilo candidato non trovato"));
 
-        List<Candidatura> lista = candidaturaService.getCandidatureByCandidato(
-                candidato.getIdCandidato()
-        );
+        List<Candidatura> lista = candidaturaService.getCandidatureByUtente(utente);
 
         return ResponseEntity.ok(lista);
     }
