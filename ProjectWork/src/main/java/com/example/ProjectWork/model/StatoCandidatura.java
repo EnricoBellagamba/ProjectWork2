@@ -18,4 +18,36 @@ public class StatoCandidatura {
 
     @Column(nullable = false)
     private Boolean isFinale;
+
+    public Long getIdStatoCandidatura() {
+        return idStatoCandidatura;
+    }
+
+    public void setIdStatoCandidatura(Long idStatoCandidatura) {
+        this.idStatoCandidatura = idStatoCandidatura;
+    }
+
+    public String getCodice() {
+        return codice;
+    }
+
+    public void setCodice(String codice) {
+        this.codice = codice;
+    }
+
+    public String getDescrizione() {
+        return descrizione;
+    }
+
+    public void setDescrizione(String descrizione) {
+        this.descrizione = descrizione;
+    }
+
+    public Boolean getFinale() {
+        return isFinale;
+    }
+
+    public void setFinale(Boolean finale) {
+        isFinale = finale;
+    }
 }

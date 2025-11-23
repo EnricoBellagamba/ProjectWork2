@@ -2,11 +2,13 @@ package com.example.ProjectWork.repository;
 
 import com.example.ProjectWork.dto.CandidatoConPosizioneDTO;
 import com.example.ProjectWork.model.Candidato;
+import com.example.ProjectWork.model.Utente;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface CandidatoRepository extends JpaRepository<Candidato, Long> {
 
@@ -33,7 +35,7 @@ public interface CandidatoRepository extends JpaRepository<Candidato, Long> {
         ORDER BY c.isActive DESC
     """, nativeQuery = true)
     List<CandidatoConPosizioneDTO> findAllByPosizioneDto(@Param("titolo") String titolo);
-
+    Optional<Candidato> findByIdUtente(Utente idUtente);
 
 
 
