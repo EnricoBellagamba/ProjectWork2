@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/candidato")
+@RequestMapping("/api/hr/candidati")
 public class CandidatoController {
 
     private final CandidatoService candidatoService;
@@ -26,8 +26,8 @@ public class CandidatoController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Candidato> getCandidatoById(@PathVariable Long id) {
-        return ResponseEntity.status(HttpStatus.FOUND)
-                .body(candidatoService.getCandidatoById(id));
+        Candidato candidato = candidatoService.getCandidatoById(id);
+        return ResponseEntity.ok(candidato); // 200 OK, NON 302 FOUND
     }
 
     @PostMapping

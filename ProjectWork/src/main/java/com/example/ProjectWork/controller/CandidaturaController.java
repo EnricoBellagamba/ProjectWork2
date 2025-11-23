@@ -33,7 +33,7 @@ public class CandidaturaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(candidaturaService.createCandidatura(candidatura));
     }
 
-    @DeleteMapping("/{id")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCandidatura(@PathVariable Long id) {
         candidaturaService.deleteCandidatura(id);
         return ResponseEntity.noContent().build();

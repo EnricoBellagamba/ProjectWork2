@@ -2,7 +2,9 @@ package com.example.ProjectWork.service.impl;
 
 import com.example.ProjectWork.dto.CandidatoConPosizioneDTO;
 import com.example.ProjectWork.model.Candidato;
+import com.example.ProjectWork.model.Utente;
 import com.example.ProjectWork.repository.CandidatoRepository;
+import com.example.ProjectWork.repository.UtenteRepository;
 import com.example.ProjectWork.service.CandidatoService;
 import org.springframework.stereotype.Service;
 
@@ -12,10 +14,11 @@ import java.util.List;
 public class CandidatoServiceImpl implements CandidatoService {
 
     private final CandidatoRepository candidatoRepository;
+    private final UtenteRepository utenteRepository;
 
-
-    public CandidatoServiceImpl(CandidatoRepository candidatoRepository) {
+    public CandidatoServiceImpl(CandidatoRepository candidatoRepository, UtenteRepository utenteRepository) {
         this.candidatoRepository = candidatoRepository;
+        this.utenteRepository = utenteRepository;
     }
 
     @Override
@@ -30,6 +33,12 @@ public class CandidatoServiceImpl implements CandidatoService {
 
     @Override
     public void deleteCandidato(Long id) {
+
+        Candidato candidatoEsistente = candidatoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Candidato non trovato: " + id));
+        candidatoEsistente.setActive(false);
+        candidatoRepository.save(candidatoEsistente);
+
         if (!candidatoRepository.existsById(id)) {
             throw new RuntimeException("Candidato non trovato con ID: " + id);
         }
@@ -50,7 +59,30 @@ public class CandidatoServiceImpl implements CandidatoService {
 
         candidatoEsistente.setActive(candidato.getActive());
 
-        return candidatoRepository.save(candidatoEsistente);
+        Utente utenteEsistente = candidatoEsistente.getIdUtente();
+        Utente utenteNuovo = candidato.getIdUtente();
+
+        if (utenteNuovo != null) {
+            if (utenteNuovo.getNome() != null)
+                utenteEsistente.setNome(utenteNuovo.getNome());
+
+            if (utenteNuovo.getCognome() != null)
+                utenteEsistente.setCognome(utenteNuovo.getCognome());
+
+            if (utenteNuovo.getEmail() != null)
+                utenteEsistente.setEmail(utenteNuovo.getEmail());
+
+            if (utenteNuovo.getTelefono() != null)
+                utenteEsistente.setTelefono(utenteNuovo.getTelefono());
+
+            if (utenteNuovo.getCitta() != null)
+                utenteEsistente.setCitta(utenteNuovo.getCitta());
+        }
+
+        utenteRepository.save(utenteEsistente);
+        candidatoRepository.save(candidatoEsistente);
+
+        return candidatoEsistente;
     }
 
     @Override
