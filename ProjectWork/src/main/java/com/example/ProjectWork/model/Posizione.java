@@ -1,11 +1,11 @@
 package com.example.ProjectWork.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-
-import jakarta.validation.constraints.Min;
 
 @Entity
 @Table(name = "POSIZIONE", schema = "dbo")
@@ -13,6 +13,7 @@ public class Posizione {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false)
     private Long idPosizione;
 
     @Column(nullable = false)
@@ -27,11 +28,9 @@ public class Posizione {
     @Column
     private String contratto;
 
-    /**
-     * RAL: nel DB è la colonna "RAL", nel JSON esponiamo "ral".
-     */
+    // RAL annua lorda
     @Column(name = "RAL")
-    private Double ral;
+    private Double RAL;
 
     @Column(nullable = false)
     @Min(value = 0)
@@ -58,14 +57,21 @@ public class Posizione {
     @ManyToMany(mappedBy = "posizioniPreferite")
     private List<Utente> utentiCheHannoPreferito = new ArrayList<>();
 
+    // ID del test associato alla posizione (FK su TEST.idTest)
+    @Column(name = "idTest")
+    private Long idTest;
+
     @PrePersist
     protected void onCreate() {
         if (this.pubblicataAt == null) {
             this.pubblicataAt = LocalDate.now();
         }
+        if (this.candidatureRicevute == null) {
+            this.candidatureRicevute = 0L;
+        }
     }
 
-    // GETTER E SETTER -----------------------------------------------------------------------------------------------
+    // GETTER E SETTER -------------------------
 
     public Long getIdPosizione() {
         return idPosizione;
@@ -107,12 +113,12 @@ public class Posizione {
         this.contratto = contratto;
     }
 
-    public Double getRal() {
-        return ral;
+    public Double getRAL() {
+        return RAL;
     }
 
-    public void setRal(Double ral) {
-        this.ral = ral;
+    public void setRAL(Double RAL) {
+        this.RAL = RAL;
     }
 
     public Long getCandidatureRicevute() {
@@ -169,5 +175,13 @@ public class Posizione {
 
     public void setUtentiCheHannoPreferito(List<Utente> utentiCheHannoPreferito) {
         this.utentiCheHannoPreferito = utentiCheHannoPreferito;
+    }
+
+    public Long getIdTest() {
+        return idTest;
+    }
+
+    public void setIdTest(Long idTest) {
+        this.idTest = idTest;
     }
 }
