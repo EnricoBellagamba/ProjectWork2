@@ -200,7 +200,12 @@ public class TestController {
                             opzioneRepository.findByDomanda_IdDomanda(domanda.getIdDomanda());
 
                     List<OpzioneDto> opzioneDtos = opzioni.stream()
-                            .map(o -> new OpzioneDto(o.getIdOpzione(), o.getTestoOpzione()))
+                            .map(o -> new OpzioneDto(
+                                    o.getIdOpzione(),
+                                    o.getTestoOpzione(),
+                                    o.getIsCorretta()
+                            ))
+
                             .collect(Collectors.toList());
 
                     return new DomandaDto(
