@@ -49,46 +49,33 @@ public class TentativoTestController {
         this.candidaturaRepository = candidaturaRepository;
     }
 
-    // =========================================================
-    //           STORICO TENTATIVI
-    // =========================================================
+    // =========================================================================
+    //                           STORICO TENTATIVI
+    // =========================================================================
 
-    /**
-     * Storico tentativi del candidato.
-     * Per ora ritorna tutti i tentativi presenti a DB (senza filtrare per utente).
-     *
-     * URL: GET /api/test/tentativi/miei
-     */
     @GetMapping("/tentativi/miei")
     public ResponseEntity<List<TentativoListItemDto>> getTentativiMiei() {
+
         List<TentativoTest> tentativi = tentativoTestRepository.findAll();
 
         List<TentativoListItemDto> risultato = tentativi.stream()
                 .map(t -> {
+
                     Test test = t.getIdTest();
-                    Long idTest = test != null ? test.getIdTest() : null;
-                    String titoloTest = test != null ? test.getTitolo() : null;
-                    Integer durataMinuti = test != null ? test.getDurataMinuti() : null;
-                    Integer punteggioMax = test != null ? test.getPunteggioMax() : null;
-
-                    String esitoCodice = "IN_VALUTAZIONE";
-                    if (t.getIdEsitoTentativo() != null && t.getIdEsitoTentativo().getCodice() != null) {
-                        esitoCodice = t.getIdEsitoTentativo().getCodice();
-                    }
-
-                    String completatoAt = t.getCompletatoAt() != null
-                            ? t.getCompletatoAt().toString()
-                            : null;
 
                     return new TentativoListItemDto(
                             t.getIdTentativo(),
-                            idTest,
-                            titoloTest,
-                            durataMinuti,
+                            test != null ? test.getIdTest() : null,
+                            test != null ? test.getTitolo() : null,
+                            test != null ? test.getDurataMinuti() : null,
                             t.getPunteggioTotale(),
-                            punteggioMax,
-                            esitoCodice,
-                            completatoAt
+                            test != null ? test.getPunteggioMax() : null,
+                            t.getIdEsitoTentativo() != null ?
+                                    t.getIdEsitoTentativo().getCodice() :
+                                    "IN_VALUTAZIONE",
+                            t.getCompletatoAt() != null ?
+                                    t.getCompletatoAt().toString() :
+                                    null
                     );
                 })
                 .collect(Collectors.toList());
@@ -96,35 +83,25 @@ public class TentativoTestController {
         return ResponseEntity.ok(risultato);
     }
 
-    // =========================================================
-    //           TENTATIVI: AVVIO, DOMANDE, RISPOSTE
-    // =========================================================
+    // =========================================================================
+    //                           AVVIO TENTATIVO
+    // =========================================================================
 
-    /**
-     * Avvia un nuovo tentativo per il test indicato.
-     * URL: POST /api/test/{idTest}/tentativi/avvia
-     *
-     * Il frontend chiama avviaTest(idTest).
-     */
     @PostMapping("/{idTest}/tentativi/avvia")
     public ResponseEntity<AvviaTestResponse> avviaTest(
             @PathVariable Long idTest,
             @RequestBody(required = false) AvviaTestRequest request
     ) {
-        if (request == null) {
-            request = new AvviaTestRequest();
-        }
+
+        if (request == null) request = new AvviaTestRequest();
 
         Test test = testService.getTestById(idTest);
 
-        // Prendiamo una candidatura "di comodo" esistente,
-        // giusto per rispettare il vincolo NOT NULL su idCandidatura.
+        // pick a candidatura for constraints
         Candidatura candidatura = candidaturaRepository.findAll()
                 .stream()
                 .findFirst()
-                .orElseThrow(() ->
-                        new RuntimeException("Nessuna candidatura presente a DB: inserisci almeno una riga in CANDIDATURA per poter avviare i test.")
-                );
+                .orElseThrow(() -> new RuntimeException("Inserire almeno una riga in CANDIDATURA."));
 
         TentativoTest tentativo = new TentativoTest();
         tentativo.setIdTest(test);
@@ -135,25 +112,25 @@ public class TentativoTestController {
 
         TentativoTest salvato = tentativoTestRepository.save(tentativo);
 
-        AvviaTestResponse response = new AvviaTestResponse(
-                salvato.getIdTentativo(),
-                test.getIdTest(),
-                salvato.getIniziatoAt().toString()
-        );
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new AvviaTestResponse(
+                        salvato.getIdTentativo(),
+                        test.getIdTest(),
+                        salvato.getIniziatoAt().toString()
+                ));
     }
 
-    /**
-     * Restituisce domande e opzioni per un tentativo specifico.
-     * URL: GET /api/test/tentativi/{idTentativo}/domande
-     */
+    // =========================================================================
+    //                         DOMANDE PER TENTATIVO
+    // =========================================================================
+
     @GetMapping("/tentativi/{idTentativo}/domande")
     public ResponseEntity<GetDomandeResponse> getDomandeTentativo(
             @PathVariable Long idTentativo
     ) {
+
         TentativoTest tentativo = tentativoTestRepository.findById(idTentativo)
-                .orElseThrow(() -> new RuntimeException("Tentativo non trovato con id: " + idTentativo));
+                .orElseThrow(() -> new RuntimeException("Tentativo non trovato."));
 
         Test test = tentativo.getIdTest();
 
@@ -161,15 +138,17 @@ public class TentativoTestController {
 
         List<DomandaDto> domandaDtos = domande.stream()
                 .map(domanda -> {
-                    List<Opzione> opzioni = opzioneRepository
-                            .findByDomanda_IdDomanda(domanda.getIdDomanda());
+                    List<Opzione> opzioni = opzioneRepository.findByDomanda_IdDomanda(domanda.getIdDomanda());
 
+                    // ************* FIX QUI *************
                     List<OpzioneDto> opzioneDtos = opzioni.stream()
-                            .map(opzione -> new OpzioneDto(
-                                    opzione.getIdOpzione(),
-                                    opzione.getTestoOpzione()
+                            .map(o -> new OpzioneDto(
+                                    o.getIdOpzione(),
+                                    o.getTestoOpzione(),
+                                    o.getIsCorretta()      // ORA CORRETTA È PASSATA
                             ))
                             .collect(Collectors.toList());
+                    // ************************************
 
                     return new DomandaDto(
                             domanda.getIdDomanda(),
@@ -179,160 +158,141 @@ public class TentativoTestController {
                 })
                 .collect(Collectors.toList());
 
-        GetDomandeResponse response = new GetDomandeResponse(
-                tentativo.getIdTentativo(),
-                test.getIdTest(),
-                test.getTitolo(),
-                test.getDurataMinuti(),
-                domandaDtos
+        return ResponseEntity.ok(
+                new GetDomandeResponse(
+                        tentativo.getIdTentativo(),
+                        test.getIdTest(),
+                        test.getTitolo(),
+                        test.getDurataMinuti(),
+                        domandaDtos
+                )
         );
-
-        return ResponseEntity.ok(response);
     }
 
-    /**
-     * Salva tutte le risposte di un tentativo e calcola il punteggio.
-     * URL: POST /api/test/tentativi/{idTentativo}/risposte
-     */
+    // =========================================================================
+    //                           INVIO RISPOSTE
+    // =========================================================================
+
     @PostMapping("/tentativi/{idTentativo}/risposte")
     public ResponseEntity<InviaRisposteResponse> inviaRisposte(
             @PathVariable Long idTentativo,
             @RequestBody InviaRisposteRequest request
     ) {
-        if (request == null) {
+
+        if (request == null)
             throw new RuntimeException("Request vuota");
-        }
 
         request.setIdTentativo(idTentativo);
 
         TentativoTest tentativo = tentativoTestRepository.findById(idTentativo)
-                .orElseThrow(() -> new RuntimeException("Tentativo non trovato con id: " + idTentativo));
+                .orElseThrow(() -> new RuntimeException("Tentativo non trovato."));
 
         Test test = tentativo.getIdTest();
 
-        // cancella eventuali risposte precedenti
-        List<Risposta> precedenti = rispostaRepository.findByIdTentativo_IdTentativo(idTentativo);
-        if (!precedenti.isEmpty()) {
-            rispostaRepository.deleteAll(precedenti);
-        }
+        // reset old answers
+        rispostaRepository.deleteAll(
+                rispostaRepository.findByIdTentativo_IdTentativo(idTentativo)
+        );
 
-        // numero domande reali del test
         List<Domanda> domandeTest = domandaRepository.findByTest_IdTest(test.getIdTest());
-        int numeroDomandeEffettive = domandeTest.size() > 0 ? domandeTest.size() : 1;
+        int numeroDomande = domandeTest.size() > 0 ? domandeTest.size() : 1;
 
-        int punteggioPerDomanda = test.getPunteggioMax() / numeroDomandeEffettive;
-
+        int puntiPerDomanda = test.getPunteggioMax() / numeroDomande;
         int punteggioTotale = 0;
 
         for (InviaRisposteRequest.RispostaInput input : request.getRisposte()) {
+
             Domanda domanda = domandaRepository.findById(input.getIdDomanda())
-                    .orElseThrow(() -> new RuntimeException("Domanda non trovata con id: " + input.getIdDomanda()));
+                    .orElseThrow(() -> new RuntimeException("Domanda non trovata."));
 
             Opzione opzione = null;
             if (input.getIdOpzione() != null) {
                 opzione = opzioneRepository.findById(input.getIdOpzione())
-                        .orElseThrow(() -> new RuntimeException("Opzione non trovata con id: " + input.getIdOpzione()));
+                        .orElseThrow(() -> new RuntimeException("Opzione non trovata."));
             }
 
             boolean corretta = opzione != null && Boolean.TRUE.equals(opzione.getIsCorretta());
-            Integer punteggioAssegnato = corretta ? punteggioPerDomanda : 0;
 
-            if (corretta) {
-                punteggioTotale += punteggioPerDomanda;
-            }
+            Integer punteggio = corretta ? puntiPerDomanda : 0;
 
-            Risposta risposta = new Risposta(
-                    punteggioAssegnato,
-                    tentativo,
-                    domanda,
-                    opzione
+            if (corretta) punteggioTotale += puntiPerDomanda;
+
+            rispostaRepository.save(
+                    new Risposta(punteggio, tentativo, domanda, opzione)
             );
-
-            rispostaRepository.save(risposta);
         }
 
         tentativo.setPunteggioTotale(punteggioTotale);
         tentativo.setCompletatoAt(LocalDate.now());
-        // volendo qui potresti settare idEsitoTentativo in base a SUPERATO/NON_SUPERATO
         tentativoTestRepository.save(tentativo);
 
-        String esitoCodice;
-        if (punteggioTotale >= test.getPunteggioMin()) {
-            esitoCodice = "SUPERATO";
-        } else {
-            esitoCodice = "NON_SUPERATO";
-        }
+        String esito = punteggioTotale >= test.getPunteggioMin()
+                ? "SUPERATO"
+                : "NON_SUPERATO";
 
-        InviaRisposteResponse response = new InviaRisposteResponse(
-                tentativo.getIdTentativo(),
-                tentativo.getPunteggioTotale(),
-                test.getPunteggioMax(),
-                esitoCodice
+        return ResponseEntity.ok(
+                new InviaRisposteResponse(
+                        tentativo.getIdTentativo(),
+                        punteggioTotale,
+                        test.getPunteggioMax(),
+                        esito
+                )
         );
-
-        return ResponseEntity.ok(response);
     }
 
-    /**
-     * Restituisce il riepilogo dei risultati di un tentativo.
-     * URL: GET /api/test/tentativi/{idTentativo}/risultati
-     */
+    // =========================================================================
+    //                           RISULTATO
+    // =========================================================================
+
     @GetMapping("/tentativi/{idTentativo}/risultati")
     public ResponseEntity<RisultatoTentativoDettaglioDto> getRisultatoTentativo(
             @PathVariable Long idTentativo
     ) {
+
         TentativoTest tentativo = tentativoTestRepository.findById(idTentativo)
-                .orElseThrow(() -> new RuntimeException("Tentativo non trovato con id: " + idTentativo));
+                .orElseThrow(() -> new RuntimeException("Tentativo non trovato."));
 
         Test test = tentativo.getIdTest();
 
         List<Risposta> risposte = rispostaRepository.findByIdTentativo_IdTentativo(idTentativo);
 
-        // numero reale di domande del test
         int numeroDomande = domandaRepository.findByTest_IdTest(test.getIdTest()).size();
 
-        int numeroCorrette = (int) risposte.stream()
-                .filter(r -> r.getIdOpzione() != null
-                        && Boolean.TRUE.equals(r.getIdOpzione().getIsCorretta()))
+        int corrette = (int) risposte.stream()
+                .filter(r -> r.getIdOpzione() != null &&
+                        Boolean.TRUE.equals(r.getIdOpzione().getIsCorretta()))
                 .count();
 
-        int numeroErrate = (int) risposte.stream()
-                .filter(r -> r.getIdOpzione() != null
-                        && !Boolean.TRUE.equals(r.getIdOpzione().getIsCorretta()))
+        int errate = (int) risposte.stream()
+                .filter(r -> r.getIdOpzione() != null &&
+                        !Boolean.TRUE.equals(r.getIdOpzione().getIsCorretta()))
                 .count();
 
-        int numeroNonRisposte = numeroDomande - numeroCorrette - numeroErrate;
-        if (numeroNonRisposte < 0) {
-            numeroNonRisposte = 0;
-        }
+        int nonRisposte = Math.max(0, numeroDomande - corrette - errate);
 
-        String esitoCodice = "IN_VALUTAZIONE";
-        if (tentativo.getIdEsitoTentativo() != null && tentativo.getIdEsitoTentativo().getCodice() != null) {
-            esitoCodice = tentativo.getIdEsitoTentativo().getCodice();
-        }
+        String esito = tentativo.getIdEsitoTentativo() == null ?
+                "IN_VALUTAZIONE" :
+                tentativo.getIdEsitoTentativo().getCodice();
 
-        String completatoAt = tentativo.getCompletatoAt() != null
-                ? tentativo.getCompletatoAt().toString()
-                : null;
-
-        Integer durataUsataMinuti = null;
-
-        RisultatoTentativoDettaglioDto dto = new RisultatoTentativoDettaglioDto(
-                tentativo.getIdTentativo(),
-                test.getIdTest(),
-                test.getTitolo(),
-                tentativo.getPunteggioTotale(),
-                test.getPunteggioMax(),
-                test.getPunteggioMin(),
-                esitoCodice,
-                completatoAt,
-                durataUsataMinuti,
-                numeroDomande,
-                numeroCorrette,
-                numeroErrate,
-                numeroNonRisposte
+        return ResponseEntity.ok(
+                new RisultatoTentativoDettaglioDto(
+                        tentativo.getIdTentativo(),
+                        test.getIdTest(),
+                        test.getTitolo(),
+                        tentativo.getPunteggioTotale(),
+                        test.getPunteggioMax(),
+                        test.getPunteggioMin(),
+                        esito,
+                        tentativo.getCompletatoAt() != null ?
+                                tentativo.getCompletatoAt().toString() :
+                                null,
+                        null,
+                        numeroDomande,
+                        corrette,
+                        errate,
+                        nonRisposte
+                )
         );
-
-        return ResponseEntity.ok(dto);
     }
+
 }

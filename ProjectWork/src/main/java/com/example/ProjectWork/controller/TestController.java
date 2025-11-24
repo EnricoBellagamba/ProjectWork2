@@ -1,16 +1,18 @@
 package com.example.ProjectWork.controller;
 
+import com.example.ProjectWork.dto.test.*;
 import com.example.ProjectWork.model.Domanda;
 import com.example.ProjectWork.model.Opzione;
 import com.example.ProjectWork.model.Test;
+import com.example.ProjectWork.model.TipoTest;
 import com.example.ProjectWork.repository.DomandaRepository;
 import com.example.ProjectWork.repository.OpzioneRepository;
+import com.example.ProjectWork.repository.TipoTestRepository;
 import com.example.ProjectWork.service.TestService;
-import com.example.ProjectWork.dto.test.*;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,20 +24,23 @@ public class TestController {
     private final TestService testService;
     private final DomandaRepository domandaRepository;
     private final OpzioneRepository opzioneRepository;
+    private final TipoTestRepository tipoTestRepository;
 
     public TestController(
             TestService testService,
             DomandaRepository domandaRepository,
-            OpzioneRepository opzioneRepository
+            OpzioneRepository opzioneRepository,
+            TipoTestRepository tipoTestRepository
     ) {
         this.testService = testService;
         this.domandaRepository = domandaRepository;
         this.opzioneRepository = opzioneRepository;
+        this.tipoTestRepository = tipoTestRepository;
     }
 
-    // =========================================================
-    //               CRUD BASE TEST
-    // =========================================================
+    // =====================================================================
+    //                         CRUD BASE
+    // =====================================================================
 
     @GetMapping
     public ResponseEntity<List<Test>> getAllTests() {
@@ -49,10 +54,80 @@ public class TestController {
                 .body(testService.getTestById(id));
     }
 
+    // =====================================================================
+    //      CREAZIONE COMPLETA TEST + DOMANDE + OPZIONI (CON TIPO TEST)
+    // =====================================================================
+
     @PostMapping
-    public ResponseEntity<Test> createTest(@RequestBody Test test) {
-        Test created = testService.createTest(test);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    public ResponseEntity<Test> createTest(@RequestBody TestCreateRequest req) {
+
+        // -------------------------
+        // 1) Valido e recupero il TipoTest
+        // -------------------------
+        if (req.codiceTipoTest == null || req.codiceTipoTest.isBlank()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "codiceTipoTest è obbligatorio"
+            );
+        }
+
+        TipoTest tipoTest = tipoTestRepository.findByCodice(req.codiceTipoTest)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "TipoTest non valido: " + req.codiceTipoTest
+                ));
+
+        // -------------------------
+        // 2) CREA TEST BASE
+        // -------------------------
+        Test test = new Test();
+        test.setTitolo(req.titolo);
+        test.setDescrizione(req.descrizione);
+        test.setDurataMinuti(req.durataMinuti);
+        test.setNumeroDomande(req.numeroDomande);
+        test.setPunteggioMax(req.punteggioMax);
+
+        // punteggioMin è NOT NULL nel DB → se non viene passato, uso 0
+        Integer min = (req.punteggioMin != null) ? req.punteggioMin : 0;
+        test.setPunteggioMin(min);
+
+        // imposta il tipo test scelto
+        test.setTipoTest(tipoTest);
+
+        // nel model il setter si chiama setAttivo(Boolean)
+        test.setAttivo(true);
+
+        Test savedTest = testService.createTest(test);
+
+        // -------------------------
+        // 3) CREA DOMANDE + OPZIONI
+        // -------------------------
+        if (req.domande != null) {
+            for (TestCreateRequest.DomandaCreateRequest d : req.domande) {
+
+                Domanda domanda = new Domanda();
+                domanda.setTest(savedTest);
+                domanda.setTesto(d.testo);
+                // La tua entity Domanda non ha il campo "punteggio", quindi lo ignoriamo
+
+                Domanda savedDomanda = domandaRepository.save(domanda);
+
+                if (d.opzioni != null) {
+                    for (TestCreateRequest.OpzioneCreateRequest o : d.opzioni) {
+
+                        Opzione opzione = new Opzione();
+                        opzione.setDomanda(savedDomanda);
+                        opzione.setTestoOpzione(o.testoOpzione);
+                        // nel model il setter è setIsCorretta(Boolean)
+                        opzione.setIsCorretta(o.corretta);
+
+                        opzioneRepository.save(opzione);
+                    }
+                }
+            }
+        }
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedTest);
     }
 
     @PutMapping("/{id}")
@@ -69,14 +144,10 @@ public class TestController {
         return ResponseEntity.noContent().build();
     }
 
-    // =========================================================
-    //        TEST DISPONIBILI PER CANDIDATO
-    // =========================================================
+    // =====================================================================
+    //                 LISTA TEST DISPONIBILI PER CANDIDATO
+    // =====================================================================
 
-    /**
-     * Lista test "disponibili" per il frontend candidati.
-     * URL: GET /api/test/disponibili
-     */
     @GetMapping("/disponibili")
     public ResponseEntity<List<TestListItemDto>> getTestDisponibili() {
         List<Test> tests = testService.getAllTests();
@@ -85,7 +156,7 @@ public class TestController {
                 .map(t -> new TestListItemDto(
                         t.getIdTest(),
                         t.getTitolo(),
-                        null, // tipo test opzionale, per ora non usato
+                        t.getTipoTest() != null ? t.getTipoTest().getCodice() : null,
                         t.getDurataMinuti(),
                         t.getDescrizione(),
                         t.getPunteggioMax()
@@ -95,14 +166,10 @@ public class TestController {
         return ResponseEntity.ok(risultato);
     }
 
-    // =========================================================
-    //         STRUTTURA COMPLETA DI UN TEST (INTRO)
-    // =========================================================
+    // =====================================================================
+    //                 STRUTTURA COMPLETA TEST (INTRO + DOMANDE)
+    // =====================================================================
 
-    /**
-     * Endpoint legacy già presente:
-     * URL: GET /api/test/{id}/domande
-     */
     @GetMapping("/{id}/domande")
     public ResponseEntity<StrutturaTestResponse> getStrutturaTestLegacy(
             @PathVariable Long id
@@ -110,10 +177,6 @@ public class TestController {
         return ResponseEntity.ok(buildStrutturaTestResponse(id));
     }
 
-    /**
-     * Endpoint usato dal frontend per la pagina di introduzione:
-     * URL: GET /api/test/{id}/struttura
-     */
     @GetMapping("/{id}/struttura")
     public ResponseEntity<StrutturaTestResponse> getStrutturaTest(
             @PathVariable Long id
@@ -121,24 +184,28 @@ public class TestController {
         return ResponseEntity.ok(buildStrutturaTestResponse(id));
     }
 
-    // ---------------------------------------------------------
-    // Helper interno per montare la struttura completa del test
-    // ---------------------------------------------------------
-    private StrutturaTestResponse buildStrutturaTestResponse(Long idTest) {
-        Test test = testService.getTestById(idTest);
+    // =====================================================================
+    //                    COSTRUZIONE STRUTTURA COMPLETA
+    // =====================================================================
 
+    private StrutturaTestResponse buildStrutturaTestResponse(Long idTest) {
+
+        Test test = testService.getTestById(idTest);
         List<Domanda> domande = domandaRepository.findByTest_IdTest(idTest);
 
         List<DomandaDto> domandaDtos = domande.stream()
                 .map(domanda -> {
-                    List<Opzione> opzioni = opzioneRepository
-                            .findByDomanda_IdDomanda(domanda.getIdDomanda());
+
+                    List<Opzione> opzioni =
+                            opzioneRepository.findByDomanda_IdDomanda(domanda.getIdDomanda());
 
                     List<OpzioneDto> opzioneDtos = opzioni.stream()
-                            .map(opzione -> new OpzioneDto(
-                                    opzione.getIdOpzione(),
-                                    opzione.getTestoOpzione()
+                            .map(o -> new OpzioneDto(
+                                    o.getIdOpzione(),
+                                    o.getTestoOpzione(),
+                                    o.getIsCorretta()
                             ))
+
                             .collect(Collectors.toList());
 
                     return new DomandaDto(
@@ -149,9 +216,11 @@ public class TestController {
                 })
                 .collect(Collectors.toList());
 
-        String tipo = null; // se vuoi, puoi derivarlo da test.getTipoTest()
-
         int numeroDomandeReali = domandaDtos.size();
+
+        String tipoCodice = test.getTipoTest() != null
+                ? test.getTipoTest().getCodice()
+                : null;
 
         return new StrutturaTestResponse(
                 test.getIdTest(),
@@ -161,7 +230,7 @@ public class TestController {
                 numeroDomandeReali,
                 test.getPunteggioMax(),
                 test.getPunteggioMin(),
-                tipo,
+                tipoCodice,
                 domandaDtos
         );
     }
