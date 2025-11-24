@@ -1,13 +1,11 @@
 package com.example.ProjectWork.model;
 
-
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.validation.constraints.Min;
-import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Table(name = "POSIZIONE", schema = "dbo")
@@ -29,8 +27,11 @@ public class Posizione {
     @Column
     private String contratto;
 
-    @Column
-    private Double RAL;
+    /**
+     * RAL: nel DB è la colonna "RAL", nel JSON esponiamo "ral".
+     */
+    @Column(name = "RAL")
+    private Double ral;
 
     @Column(nullable = false)
     @Min(value = 0)
@@ -57,7 +58,6 @@ public class Posizione {
     @ManyToMany(mappedBy = "posizioniPreferite")
     private List<Utente> utentiCheHannoPreferito = new ArrayList<>();
 
-
     @PrePersist
     protected void onCreate() {
         if (this.pubblicataAt == null) {
@@ -65,9 +65,7 @@ public class Posizione {
         }
     }
 
-
-
-    //GETTER E SETTER -----------------------------------------------------------------------------------------------
+    // GETTER E SETTER -----------------------------------------------------------------------------------------------
 
     public Long getIdPosizione() {
         return idPosizione;
@@ -109,12 +107,12 @@ public class Posizione {
         this.contratto = contratto;
     }
 
-    public Double getRAL() {
-        return RAL;
+    public Double getRal() {
+        return ral;
     }
 
-    public void setRAL(Double RAL) {
-        this.RAL = RAL;
+    public void setRal(Double ral) {
+        this.ral = ral;
     }
 
     public Long getCandidatureRicevute() {
@@ -173,4 +171,3 @@ public class Posizione {
         this.utentiCheHannoPreferito = utentiCheHannoPreferito;
     }
 }
-
