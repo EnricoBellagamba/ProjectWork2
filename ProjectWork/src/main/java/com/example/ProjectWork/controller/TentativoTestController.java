@@ -1,6 +1,15 @@
 package com.example.ProjectWork.controller;
 
-import com.example.ProjectWork.dto.test.*;
+import com.example.ProjectWork.dto.test.AvviaTestRequest;
+import com.example.ProjectWork.dto.test.AvviaTestResponse;
+import com.example.ProjectWork.dto.test.DomandaDto;
+import com.example.ProjectWork.dto.test.GetDomandeResponse;
+import com.example.ProjectWork.dto.test.InviaRisposteRequest;
+import com.example.ProjectWork.dto.test.InviaRisposteResponse;
+import com.example.ProjectWork.dto.test.OpzioneDto;
+import com.example.ProjectWork.dto.test.RisultatoTentativoDettaglioDto;
+import com.example.ProjectWork.dto.test.StrutturaTestResponse;
+import com.example.ProjectWork.dto.test.TentativoListItemDto;
 import com.example.ProjectWork.model.Candidatura;
 import com.example.ProjectWork.model.Domanda;
 import com.example.ProjectWork.model.Opzione;
@@ -13,7 +22,6 @@ import com.example.ProjectWork.repository.OpzioneRepository;
 import com.example.ProjectWork.repository.RispostaRepository;
 import com.example.ProjectWork.repository.TentativoTestRepository;
 import com.example.ProjectWork.service.TestService;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -60,7 +68,6 @@ public class TentativoTestController {
 
         List<TentativoListItemDto> risultato = tentativi.stream()
                 .map(t -> {
-
                     Test test = t.getIdTest();
 
                     return new TentativoListItemDto(
@@ -70,12 +77,12 @@ public class TentativoTestController {
                             test != null ? test.getDurataMinuti() : null,
                             t.getPunteggioTotale(),
                             test != null ? test.getPunteggioMax() : null,
-                            t.getIdEsitoTentativo() != null ?
-                                    t.getIdEsitoTentativo().getCodice() :
-                                    "IN_VALUTAZIONE",
-                            t.getCompletatoAt() != null ?
-                                    t.getCompletatoAt().toString() :
-                                    null
+                            t.getIdEsitoTentativo() != null
+                                    ? t.getIdEsitoTentativo().getCodice()
+                                    : "IN_VALUTAZIONE",
+                            t.getCompletatoAt() != null
+                                    ? t.getCompletatoAt().toString()
+                                    : null
                     );
                 })
                 .collect(Collectors.toList());
@@ -93,15 +100,40 @@ public class TentativoTestController {
             @RequestBody(required = false) AvviaTestRequest request
     ) {
 
-        if (request == null) request = new AvviaTestRequest();
+        if (request == null) {
+            request = new AvviaTestRequest();
+        }
 
         Test test = testService.getTestById(idTest);
 
-        // pick a candidatura for constraints
+        // TODO: quando colleghiamo l'utente, useremo la candidatura del candidato loggato.
+        // Per ora usiamo la prima candidatura presente a DB.
         Candidatura candidatura = candidaturaRepository.findAll()
                 .stream()
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Inserire almeno una riga in CANDIDATURA."));
+
+        // Una sola esecuzione del test per quella candidatura
+        TentativoTest esistente = tentativoTestRepository.findAll().stream()
+                .filter(t -> t.getIdTest() != null
+                        && t.getIdTest().getIdTest().equals(test.getIdTest())
+                        && t.getIdCandidatura() != null
+                        && t.getIdCandidatura().getIdCandidatura()
+                        .equals(candidatura.getIdCandidatura()))
+                .findFirst()
+                .orElse(null);
+
+        if (esistente != null) {
+            // Test già svolto/avviato → non ne creiamo un altro
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new AvviaTestResponse(
+                            esistente.getIdTentativo(),
+                            test.getIdTest(),
+                            esistente.getIniziatoAt() != null
+                                    ? esistente.getIniziatoAt().toString()
+                                    : null
+                    ));
+        }
 
         TentativoTest tentativo = new TentativoTest();
         tentativo.setIdTest(test);
@@ -116,7 +148,9 @@ public class TentativoTestController {
                 .body(new AvviaTestResponse(
                         salvato.getIdTentativo(),
                         test.getIdTest(),
-                        salvato.getIniziatoAt().toString()
+                        salvato.getIniziatoAt() != null
+                                ? salvato.getIniziatoAt().toString()
+                                : null
                 ));
     }
 
@@ -140,15 +174,13 @@ public class TentativoTestController {
                 .map(domanda -> {
                     List<Opzione> opzioni = opzioneRepository.findByDomanda_IdDomanda(domanda.getIdDomanda());
 
-                    // ************* FIX QUI *************
                     List<OpzioneDto> opzioneDtos = opzioni.stream()
                             .map(o -> new OpzioneDto(
                                     o.getIdOpzione(),
                                     o.getTestoOpzione(),
-                                    o.getIsCorretta()      // ORA CORRETTA È PASSATA
+                                    o.getIsCorretta()
                             ))
                             .collect(Collectors.toList());
-                    // ************************************
 
                     return new DomandaDto(
                             domanda.getIdDomanda(),
@@ -179,8 +211,9 @@ public class TentativoTestController {
             @RequestBody InviaRisposteRequest request
     ) {
 
-        if (request == null)
+        if (request == null) {
             throw new RuntimeException("Request vuota");
+        }
 
         request.setIdTentativo(idTentativo);
 
@@ -189,7 +222,7 @@ public class TentativoTestController {
 
         Test test = tentativo.getIdTest();
 
-        // reset old answers
+        // Cancella eventuali risposte precedenti per questo tentativo
         rispostaRepository.deleteAll(
                 rispostaRepository.findByIdTentativo_IdTentativo(idTentativo)
         );
@@ -215,7 +248,9 @@ public class TentativoTestController {
 
             Integer punteggio = corretta ? puntiPerDomanda : 0;
 
-            if (corretta) punteggioTotale += puntiPerDomanda;
+            if (corretta) {
+                punteggioTotale += puntiPerDomanda;
+            }
 
             rispostaRepository.save(
                     new Risposta(punteggio, tentativo, domanda, opzione)
@@ -230,18 +265,18 @@ public class TentativoTestController {
                 ? "SUPERATO"
                 : "NON_SUPERATO";
 
-        return ResponseEntity.ok(
-                new InviaRisposteResponse(
-                        tentativo.getIdTentativo(),
-                        punteggioTotale,
-                        test.getPunteggioMax(),
-                        esito
-                )
+        InviaRisposteResponse responseBody = new InviaRisposteResponse(
+                tentativo.getIdTentativo(),
+                punteggioTotale,
+                test.getPunteggioMax(),
+                esito
         );
+
+        return ResponseEntity.ok(responseBody);
     }
 
     // =========================================================================
-    //                           RISULTATO
+    //                           RISULTATO TENTATIVO
     // =========================================================================
 
     @GetMapping("/tentativi/{idTentativo}/risultati")
@@ -259,40 +294,92 @@ public class TentativoTestController {
         int numeroDomande = domandaRepository.findByTest_IdTest(test.getIdTest()).size();
 
         int corrette = (int) risposte.stream()
-                .filter(r -> r.getIdOpzione() != null &&
-                        Boolean.TRUE.equals(r.getIdOpzione().getIsCorretta()))
+                .filter(r -> r.getIdOpzione() != null
+                        && Boolean.TRUE.equals(r.getIdOpzione().getIsCorretta()))
                 .count();
 
         int errate = (int) risposte.stream()
-                .filter(r -> r.getIdOpzione() != null &&
-                        !Boolean.TRUE.equals(r.getIdOpzione().getIsCorretta()))
+                .filter(r -> r.getIdOpzione() != null
+                        && !Boolean.TRUE.equals(r.getIdOpzione().getIsCorretta()))
                 .count();
 
         int nonRisposte = Math.max(0, numeroDomande - corrette - errate);
 
-        String esito = tentativo.getIdEsitoTentativo() == null ?
-                "IN_VALUTAZIONE" :
-                tentativo.getIdEsitoTentativo().getCodice();
+        String esito = tentativo.getIdEsitoTentativo() == null
+                ? "IN_VALUTAZIONE"
+                : tentativo.getIdEsitoTentativo().getCodice();
 
-        return ResponseEntity.ok(
-                new RisultatoTentativoDettaglioDto(
-                        tentativo.getIdTentativo(),
-                        test.getIdTest(),
-                        test.getTitolo(),
-                        tentativo.getPunteggioTotale(),
-                        test.getPunteggioMax(),
-                        test.getPunteggioMin(),
-                        esito,
-                        tentativo.getCompletatoAt() != null ?
-                                tentativo.getCompletatoAt().toString() :
-                                null,
-                        null,
-                        numeroDomande,
-                        corrette,
-                        errate,
-                        nonRisposte
-                )
+        RisultatoTentativoDettaglioDto dto = new RisultatoTentativoDettaglioDto(
+                tentativo.getIdTentativo(),
+                test.getIdTest(),
+                test.getTitolo(),
+                tentativo.getPunteggioTotale(),
+                test.getPunteggioMax(),
+                test.getPunteggioMin(),
+                esito,
+                tentativo.getCompletatoAt() != null
+                        ? tentativo.getCompletatoAt().toString()
+                        : null,
+                null,              // durataUsataMinuti (non calcolata)
+                numeroDomande,
+                corrette,
+                errate,
+                nonRisposte
         );
+
+        return ResponseEntity.ok(dto);
     }
 
+    // =========================================================================
+    //                     STRUTTURA COMPLETA TEST (PER HR)
+    // =========================================================================
+
+    @GetMapping("/{idTest}/struttura-tentativo/{idTentativo}")
+    public ResponseEntity<StrutturaTestResponse> getStrutturaPerTentativo(
+            @PathVariable Long idTest,
+            @PathVariable Long idTentativo
+    ) {
+
+        Test test = testService.getTestById(idTest);
+        List<Domanda> domande = domandaRepository.findByTest_IdTest(idTest);
+
+        List<DomandaDto> domandaDtos = domande.stream()
+                .map(domanda -> {
+                    List<Opzione> opzioni =
+                            opzioneRepository.findByDomanda_IdDomanda(domanda.getIdDomanda());
+
+                    List<OpzioneDto> opzioneDtos = opzioni.stream()
+                            .map(o -> new OpzioneDto(
+                                    o.getIdOpzione(),
+                                    o.getTestoOpzione(),
+                                    o.getIsCorretta()
+                            ))
+                            .collect(Collectors.toList());
+
+                    return new DomandaDto(
+                            domanda.getIdDomanda(),
+                            domanda.getTesto(),
+                            opzioneDtos
+                    );
+                })
+                .collect(Collectors.toList());
+
+        int numeroDomande = domandaDtos.size();
+        Integer punteggioMin = test.getPunteggioMin();
+        String tipo = null; // se vuoi puoi prendere descrizione/codice da test.getTipoTest()
+
+        StrutturaTestResponse resp = new StrutturaTestResponse(
+                test.getIdTest(),
+                test.getTitolo(),
+                test.getDescrizione(),
+                test.getDurataMinuti(),
+                numeroDomande,
+                test.getPunteggioMax(),
+                punteggioMin,
+                tipo,
+                domandaDtos
+        );
+
+        return ResponseEntity.ok(resp);
+    }
 }
