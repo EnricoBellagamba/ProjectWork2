@@ -2,8 +2,7 @@
 package com.example.ProjectWork.model;
 
 import jakarta.persistence.*;
-
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -27,10 +26,10 @@ public class TentativoTest {
     private EsitoTentativo idEsitoTentativo;
 
     @Column(nullable = false)
-    private LocalDate IniziatoAt;
+    private LocalDateTime iniziatoAt;
 
     @Column
-    private LocalDate completatoAt;
+    private LocalDateTime completatoAt;
 
     @Column(nullable = false)
     private Integer punteggioTotale;
@@ -47,14 +46,14 @@ public class TentativoTest {
             Candidatura idCandidatura,
             Test idTest,
             EsitoTentativo idEsitoTentativo,
-            LocalDate iniziatoAt,
-            LocalDate completatoAt,
+            LocalDateTime iniziatoAt,
+            LocalDateTime completatoAt,
             Integer punteggioTotale
     ) {
         this.idCandidatura = idCandidatura;
         this.idTest = idTest;
         this.idEsitoTentativo = idEsitoTentativo;
-        this.IniziatoAt = iniziatoAt;
+        this.iniziatoAt = iniziatoAt;
         this.completatoAt = completatoAt;
         this.punteggioTotale = punteggioTotale;
     }
@@ -93,19 +92,19 @@ public class TentativoTest {
         this.idEsitoTentativo = idEsitoTentativo;
     }
 
-    public LocalDate getIniziatoAt() {
-        return IniziatoAt;
+    public LocalDateTime getIniziatoAt() {
+        return iniziatoAt;
     }
 
-    public void setIniziatoAt(LocalDate iniziatoAt) {
-        IniziatoAt = iniziatoAt;
+    public void setIniziatoAt(LocalDateTime iniziatoAt) {
+        this.iniziatoAt = iniziatoAt;
     }
 
-    public LocalDate getCompletatoAt() {
+    public LocalDateTime getCompletatoAt() {
         return completatoAt;
     }
 
-    public void setCompletatoAt(LocalDate completatoAt) {
+    public void setCompletatoAt(LocalDateTime completatoAt) {
         this.completatoAt = completatoAt;
     }
 
