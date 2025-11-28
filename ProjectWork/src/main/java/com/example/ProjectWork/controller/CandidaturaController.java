@@ -1,5 +1,6 @@
 package com.example.ProjectWork.controller;
 
+import com.example.ProjectWork.dto.candidatura.CandidaturaMiaDto;
 import com.example.ProjectWork.dto.candidatura.NuovaCandidaturaRequest;
 import com.example.ProjectWork.model.Candidato;
 import com.example.ProjectWork.model.Candidatura;
@@ -24,7 +25,9 @@ public class CandidaturaController {
     private final UtenteRepository utenteRepository;
     private final CandidatoRepository candidatoRepository;
 
-    public CandidaturaController(CandidaturaService candidaturaService, UtenteRepository utenteRepository, CandidatoRepository candidatoRepository) {
+    public CandidaturaController(CandidaturaService candidaturaService,
+                                 UtenteRepository utenteRepository,
+                                 CandidatoRepository candidatoRepository) {
         this.candidaturaService = candidaturaService;
         this.utenteRepository = utenteRepository;
         this.candidatoRepository = candidatoRepository;
@@ -37,20 +40,24 @@ public class CandidaturaController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Candidatura> getCandidaturaById(@PathVariable Long id) {
-        return ResponseEntity.status(HttpStatus.FOUND).body(candidaturaService.getCandidaturaById(id));
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .body(candidaturaService.getCandidaturaById(id));
     }
 
     @PostMapping
     @PreAuthorize("hasRole('CANDIDATO')")
-    public ResponseEntity<Candidatura> createCandidatura(@RequestBody NuovaCandidaturaRequest request , Authentication authentication) {
+    public ResponseEntity<Candidatura> createCandidatura(
+            @RequestBody NuovaCandidaturaRequest request,
+            Authentication authentication
+    ) {
         // 1. Dal token ricavo l'email dell'utente loggato
         String email = authentication.getName();
         Utente utente = utenteRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Utente non trovato"));
 
-        // 2. CERCO il profilo candidato per questo utente ,Se NON esiste, lo creo. Se esiste, lo riuso.
-        Candidato candidato =candidatoRepository.findByIdUtente(utente)
+        // 2. CERCO il profilo candidato per questo utente, se NON esiste lo creo
+        Candidato candidato = candidatoRepository.findByIdUtente(utente)
                 .orElseGet(() -> {
                     Candidato nuovo = new Candidato();
                     nuovo.setIdUtente(utente);
@@ -59,7 +66,7 @@ public class CandidaturaController {
                 });
 
         // Creo la candidatura per questa posizione usando SEMPRE lo stesso idCandidato
-        Candidatura nuova =candidaturaService.createCandidatura(
+        Candidatura nuova = candidaturaService.createCandidatura(
                 candidato.getIdCandidato(),
                 request.getIdPosizione()
         );
@@ -69,7 +76,7 @@ public class CandidaturaController {
 
     @GetMapping("/mie")
     @PreAuthorize("hasRole('CANDIDATO')")
-    public ResponseEntity<List<Candidatura>> getMieCandidature(Authentication authentication) {
+    public ResponseEntity<List<CandidaturaMiaDto>> getMieCandidature(Authentication authentication) {
 
         String email = authentication.getName();
 
@@ -77,17 +84,14 @@ public class CandidaturaController {
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Utente non trovato"));
 
-
-        List<Candidatura> lista = candidaturaService.getCandidatureByUtente(utente);
+        List<CandidaturaMiaDto> lista = candidaturaService.getCandidatureDettaglioByUtente(utente);
 
         return ResponseEntity.ok(lista);
     }
-
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCandidatura(@PathVariable Long id) {
         candidaturaService.deleteCandidatura(id);
         return ResponseEntity.noContent().build();
     }
-
 }
