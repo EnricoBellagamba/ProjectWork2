@@ -9,8 +9,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
-import org.springframework.web.bind.annotation.RestController;
-
 @RestController
 @RequestMapping("/api/utenti")
 public class UtenteController {
