@@ -1,12 +1,19 @@
 package com.example.ProjectWork.controller;
+import com.example.ProjectWork.dto.utente.UpdatePasswordRequest;
+import com.example.ProjectWork.dto.utente.UpdateProfiloCandidatoRequest;
+import com.example.ProjectWork.dto.utente.UtenteDto;
 import com.example.ProjectWork.model.Utente;
 import com.example.ProjectWork.repository.UtenteRepository;
 import com.example.ProjectWork.service.UtenteService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -42,12 +49,27 @@ public class UtenteController {
     }
 
     // UPDATE
-    @PutMapping("/{id}")
-    public ResponseEntity<Utente> updateUtente(
+    @PutMapping(
+            value = "/{id}",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+        )
+    public ResponseEntity<UtenteDto> updateUtente(
             @PathVariable Long id,
-            @RequestBody Utente utenteDetails) {
+            @Valid @RequestPart("payload") UpdateProfiloCandidatoRequest req,
+            @RequestPart(value = "cv", required = false) MultipartFile cvFile) throws IOException {
 
-        return ResponseEntity.ok(utenteService.updateUtente(id, utenteDetails));
+        UtenteDto updated = utenteService.updateUtente(id, req, cvFile);
+        return ResponseEntity.ok(updated);
+    }
+
+    // CAMBIO PASSWORD
+    @PostMapping("/{id}/password")
+    public ResponseEntity<Void> updatePassword(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdatePasswordRequest request
+    ) {
+        utenteService.updatePassword(id, request);
+        return ResponseEntity.noContent().build();
     }
 
     // DELETE
