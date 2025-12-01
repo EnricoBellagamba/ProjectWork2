@@ -20,7 +20,7 @@ public class Test {
     @Column
     private String descrizione;
 
-    @Max(value = 20, message = "I minuti non possono superare i 20")
+    @Max(value = 60, message = "I minuti non possono superare i 60")
     @Column(nullable = false)
     private Integer durataMinuti;
 
