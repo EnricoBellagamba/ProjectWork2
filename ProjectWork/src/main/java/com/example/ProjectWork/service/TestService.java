@@ -26,6 +26,7 @@ public interface TestService {
 
     /**
      * Crea un nuovo test.
+     * Applica i vincoli di business su durata, numero domande e punteggi.
      *
      * @param newTest entità Test da creare
      * @return Test creato e salvato
@@ -34,6 +35,7 @@ public interface TestService {
 
     /**
      * Aggiorna un test esistente.
+     * Applica i vincoli di business su durata, numero domande e punteggi.
      *
      * @param id   id del test da aggiornare
      * @param test dati aggiornati
