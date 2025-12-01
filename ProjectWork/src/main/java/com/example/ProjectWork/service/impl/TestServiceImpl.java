@@ -15,7 +15,8 @@ public class TestServiceImpl implements TestService {
     private final TestRepository testRepository;
     private final TipoTestRepository tipoTestRepository;
 
-    public TestServiceImpl(TestRepository testRepository, TipoTestRepository tipoTestRepository) {
+    public TestServiceImpl(TestRepository testRepository,
+                           TipoTestRepository tipoTestRepository) {
         this.testRepository = testRepository;
         this.tipoTestRepository = tipoTestRepository;
     }
@@ -46,11 +47,10 @@ public class TestServiceImpl implements TestService {
     }
 
     /**
-     * Aggiornamento dei campi base del test + tipo test.
+     * Aggiornamento dei campi base del test e del TipoTest associato.
      */
     @Override
     public Test updateTest(Long id, Test testDetails) {
-
         Test existingTest = testRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Test non trovato con id: " + id));
 
@@ -67,7 +67,7 @@ public class TestServiceImpl implements TestService {
 
         existingTest.setAttivo(testDetails.getAttivo());
 
-        // relazione con TipoTest
+        // Relazione con TipoTest
         if (testDetails.getTipoTest() != null) {
             Long tipoTestId = testDetails.getTipoTest().getIdTipoTest();
             TipoTest tipoTest = tipoTestRepository.findById(tipoTestId)
