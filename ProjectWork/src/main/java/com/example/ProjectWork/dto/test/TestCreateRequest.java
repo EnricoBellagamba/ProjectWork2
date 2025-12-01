@@ -18,6 +18,7 @@ public class TestCreateRequest {
 
     public static class DomandaCreateRequest {
         public String testo;
+        // il punteggio per domanda lo useremo dopo, con vincoli 1-10
         public Integer punteggio;
         public List<OpzioneCreateRequest> opzioni;
     }

@@ -30,6 +30,7 @@ public class Posizione {
 
     @Min(value = 0, message = "Il valore della RAL deve essere positivo.")
     @Column(name = "RAL")
+    @Min(value = 0, message = "Il valore della RAL deve essere positivo.")
     private Double RAL;
 
     @Column(nullable = false)

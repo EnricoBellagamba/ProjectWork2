@@ -78,7 +78,38 @@ public class TestController {
                 ));
 
         // -------------------------
-        // 2) CREA TEST BASE
+        // 2) NORMALIZZO I VALORI NUMERICI DAL DTO
+        //    (paracadute extra prima di arrivare alla service)
+        // -------------------------
+
+        // punteggioMin: se null o negativo -> 0
+        if (req.punteggioMin == null || req.punteggioMin < 0) {
+            req.punteggioMin = 0;
+        }
+
+        // punteggioMax: se null, <=0 o >100 -> 100
+        if (req.punteggioMax == null || req.punteggioMax <= 0 || req.punteggioMax > 100) {
+            req.punteggioMax = 100;
+        }
+
+        // durataMinuti e numeroDomande li validiamo in service,
+        // ma se proprio arrivano null lanciamo errore chiaro qui
+        if (req.durataMinuti == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "durataMinuti è obbligatoria"
+            );
+        }
+        if (req.numeroDomande == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "numeroDomande è obbligatorio"
+            );
+        }
+
+        // -------------------------
+        // 3) CREA TEST BASE
+        //    (i vincoli su durata, domande e punteggi li applica poi il service)
         // -------------------------
         Test test = new Test();
         test.setTitolo(req.titolo);
@@ -86,10 +117,7 @@ public class TestController {
         test.setDurataMinuti(req.durataMinuti);
         test.setNumeroDomande(req.numeroDomande);
         test.setPunteggioMax(req.punteggioMax);
-
-        // punteggioMin è NOT NULL nel DB → se non viene passato, uso 0
-        Integer min = (req.punteggioMin != null) ? req.punteggioMin : 0;
-        test.setPunteggioMin(min);
+        test.setPunteggioMin(req.punteggioMin);
 
         // imposta il tipo test scelto
         test.setTipoTest(tipoTest);
@@ -97,10 +125,11 @@ public class TestController {
         // nel model il setter si chiama setAttivo(Boolean)
         test.setAttivo(true);
 
+        // Questo applica default (punteggi) + vincoli (durata, domande, punteggi)
         Test savedTest = testService.createTest(test);
 
         // -------------------------
-        // 3) CREA DOMANDE + OPZIONI
+        // 4) CREA DOMANDE + OPZIONI
         // -------------------------
         if (req.domande != null) {
             for (TestCreateRequest.DomandaCreateRequest d : req.domande) {

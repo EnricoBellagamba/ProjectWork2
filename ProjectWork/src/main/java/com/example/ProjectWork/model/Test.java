@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 
-import java.util.List;
-
 @Entity
 @Table(name = "TEST", schema = "dbo")
 public class Test {
