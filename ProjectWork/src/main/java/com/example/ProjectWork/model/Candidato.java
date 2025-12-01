@@ -1,6 +1,10 @@
 package com.example.ProjectWork.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "CANDIDATO", schema = "dbo")
@@ -12,10 +16,14 @@ public class Candidato {
 
     @OneToOne
     @JoinColumn(name = "idUtente")
+    @JsonBackReference
     private Utente idUtente;
 
     @Column(nullable = false)
     private Boolean isActive;
+
+    @OneToMany(mappedBy = "candidato", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Candidatura> candidature = new ArrayList<>();
 
 
     public Long getIdCandidato() {

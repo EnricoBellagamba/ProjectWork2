@@ -1,6 +1,7 @@
 package com.example.ProjectWork.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -66,6 +67,10 @@ public class Utente {
     @JsonBackReference
     private Ruolo idRuolo;
 
+    @OneToOne(mappedBy = "idUtente", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private Candidato candidato;
+
     @ManyToMany
     @JoinTable(
             name = "UTENTE_POSIZIONE_PREFERITA",
@@ -74,6 +79,7 @@ public class Utente {
     )
     private List<Posizione> posizioniPreferite = new ArrayList<>();
 
+    private Integer tokenVersion = 0;
 
 
     //GETTER E SETTER -----------------------------------------------------------------------------------------------
@@ -196,5 +202,21 @@ public class Utente {
 
     public void setPosizioniPreferite(List<Posizione> posizioniPreferite) {
         this.posizioniPreferite = posizioniPreferite;
+    }
+
+    public Candidato getCandidato() {
+        return candidato;
+    }
+
+    public void setCandidato(Candidato candidato) {
+        this.candidato = candidato;
+    }
+
+    public Integer getTokenVersion() {
+        return tokenVersion;
+    }
+
+    public void setTokenVersion(Integer tokenVersion) {
+        this.tokenVersion = tokenVersion;
     }
 }
