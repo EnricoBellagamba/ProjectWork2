@@ -19,6 +19,7 @@ public class Test {
     private String descrizione;
 
     @Max(value = 60, message = "I minuti non possono superare i 60")
+    @Min(value = 1, message = "Il settaggio minimo è di un minuto")
     @Column(nullable = false)
     private Integer durataMinuti;
 
