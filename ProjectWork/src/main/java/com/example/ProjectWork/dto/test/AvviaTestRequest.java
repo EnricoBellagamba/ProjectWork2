@@ -1,5 +1,13 @@
 package com.example.ProjectWork.dto.test;
 
-// per ora vuoto, in futuro puoi aggiungere idPosizione, ecc.
-public class AvviaTestRequest {
+    public class AvviaTestRequest {
+    private Long idCandidatura;
+
+    public Long getIdCandidatura() {
+        return idCandidatura;
+    }
+
+    public void setIdCandidatura(Long idCandidatura) {
+        this.idCandidatura = idCandidatura;
+    }
 }
