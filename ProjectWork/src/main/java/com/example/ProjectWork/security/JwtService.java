@@ -52,11 +52,9 @@ public class JwtService {
             claims.put("role", u.getIdRuolo().getCodice()); // "HR" / "CANDIDATO"
         }
 
-        claims.put("tokenVersion", u.getTokenVersion());
-
         return Jwts.builder()
                 .claims(claims)
-                .subject(u.getIdUtente().toString())
+                .subject(u.getEmail())
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(expiry))
                 .signWith(getKey(), SignatureAlgorithm.HS256)
