@@ -107,6 +107,43 @@ public class TestController {
             );
         }
 
+        // Controlla che il numero di domande fornite corrisponda a numeroDomande
+        if (req.domande == null || req.domande.size() != req.numeroDomande) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Il numero di domande fornite (" + (req.domande == null ? 0 : req.domande.size()) +
+                            ") deve corrispondere al campo numeroDomande (" + req.numeroDomande + ")."
+            );
+        }
+
+        // Calcola il Punteggio Totale Massimale dalle Domande
+        int punteggioTotaleDomande = 0;
+        // Punteggio massimo consentito per singola domanda (come da commento nel tuo DTO)
+        final int MAX_PUNTI_PER_DOMANDA = 10;
+
+        for (TestCreateRequest.DomandaCreateRequest d : req.domande) {
+
+            // Vincolo: il punteggio di ogni domanda deve essere valido (tra 1 e 10)
+            if (d.punteggio == null || d.punteggio <= 0 || d.punteggio > MAX_PUNTI_PER_DOMANDA) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Ogni domanda deve avere un punteggio compreso tra 1 e " + MAX_PUNTI_PER_DOMANDA + ". Trovato: " + d.punteggio
+                );
+            }
+
+            // Somma i punteggi di tutte le domande per ottenere il Punteggio Massimo RAGGIUNGIBILE
+            punteggioTotaleDomande += d.punteggio;
+        }
+
+        // Vincolo Principale: Il punteggio totale raggiungibile NON DEVE ESSERE inferiore a punteggioMax
+        if (punteggioTotaleDomande < req.punteggioMax) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Il punteggio massimo del test inserito (" + req.punteggioMax +
+                            ") non è raggiungibile. Il punteggio massimo ottenibile dalla somma delle domande è solo " + punteggioTotaleDomande + "."
+            );
+        }
+
         // -------------------------
         // 3) CREA TEST BASE
         //    (i vincoli su durata, domande e punteggi li applica poi il service)
@@ -131,13 +168,15 @@ public class TestController {
         // -------------------------
         // 4) CREA DOMANDE + OPZIONI
         // -------------------------
+        // -------------------------
+        // 4) CREA DOMANDE + OPZIONI
+        // -------------------------
         if (req.domande != null) {
             for (TestCreateRequest.DomandaCreateRequest d : req.domande) {
 
                 Domanda domanda = new Domanda();
                 domanda.setTest(savedTest);
                 domanda.setTesto(d.testo);
-                // La tua entity Domanda non ha il campo "punteggio", quindi lo ignoriamo
 
                 Domanda savedDomanda = domandaRepository.save(domanda);
 
