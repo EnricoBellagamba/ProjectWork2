@@ -1,6 +1,8 @@
 package com.example.ProjectWork.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 
 import java.util.List;
 
@@ -18,15 +20,19 @@ public class Test {
     @Column
     private String descrizione;
 
+    @Max(value = 20, message = "I minuti non possono superare i 20")
     @Column(nullable = false)
     private Integer durataMinuti;
 
+    @Max(value = 20, message = "Domande massime per test 20")
     @Column(nullable = false)
     private Integer numeroDomande;
 
+    @Max(value = 100, message = "Punteggio massimo per test 100")
     @Column(nullable = false)
     private Integer punteggioMax;
 
+    @Min(value = 0, message = "Punteggio minimo per test 0")
     @Column(nullable = false)
     private Integer punteggioMin;
 

@@ -1,6 +1,8 @@
 package com.example.ProjectWork.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 
 @Entity
 @Table(name = "RISPOSTA", schema = "dbo")
@@ -11,6 +13,8 @@ public class Risposta {
     private Long idRisposta;
 
     @Column
+    @Max(value = 10, message = "Valore massimo per singola risposta 10")
+    @Min(value = 1, message = "Valore minimo per singola risposta 1")
     private Integer punteggioAssegnato;
 
     @ManyToOne
