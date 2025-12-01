@@ -28,7 +28,7 @@ public class Posizione {
     @Column
     private String contratto;
 
-    // RAL annua lorda
+    @Min(value = 0, message = "Il valore della RAL deve essere positivo.")
     @Column(name = "RAL")
     private Double RAL;
 
