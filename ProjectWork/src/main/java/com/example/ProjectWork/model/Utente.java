@@ -20,7 +20,11 @@ public class Utente {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idUtente;
 
-    @Column(nullable = false)
+    @Column(name = "email",
+            nullable = false,
+            unique = true,
+            length = 320
+    )
     @Email(message = "Il formato dell'email inserita è sbagliato")
     @Pattern(regexp = ".+@.+\\..+", message = "Email deve avere un dominio valido")
     @NotBlank(message = "L'email è obbligatoria")
