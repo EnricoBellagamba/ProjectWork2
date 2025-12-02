@@ -13,17 +13,11 @@ public class TentativoTest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idTentativo;
 
-    @ManyToOne
-    @JoinColumn(name = "idCandidatura")
-    private Candidatura idCandidatura;
+    @Column(name = "idCandidatura")
+    private Long idCandidatura;
 
-    @ManyToOne
-    @JoinColumn(name = "idTest")
-    private Test idTest;
-
-    @OneToOne
-    @JoinColumn(name = "idEsitoTentativo")
-    private EsitoTentativo idEsitoTentativo;
+    @Column(name = "idTest")
+    private Long idTest;
 
     @Column(nullable = false)
     private LocalDateTime iniziatoAt;
@@ -34,8 +28,9 @@ public class TentativoTest {
     @Column(nullable = false)
     private Integer punteggioTotale;
 
-    @OneToMany(mappedBy = "idTentativo")
-    private List<Risposta> risposte;
+    @OneToOne
+    @JoinColumn(name = "idEsitoTentativo")
+    private EsitoTentativo idEsitoTentativo;
 
     // ===================== COSTRUTTORI =====================
 
@@ -43,8 +38,8 @@ public class TentativoTest {
     }
 
     public TentativoTest(
-            Candidatura idCandidatura,
-            Test idTest,
+            Long idCandidatura,
+            Long idTest,
             EsitoTentativo idEsitoTentativo,
             LocalDateTime iniziatoAt,
             LocalDateTime completatoAt,
@@ -68,19 +63,19 @@ public class TentativoTest {
         this.idTentativo = idTentativo;
     }
 
-    public Candidatura getIdCandidatura() {
+    public Long getIdCandidatura() {
         return idCandidatura;
     }
 
-    public void setIdCandidatura(Candidatura idCandidatura) {
+    public void setIdCandidatura(Long idCandidatura) {
         this.idCandidatura = idCandidatura;
     }
 
-    public Test getIdTest() {
+    public Long getIdTest() {
         return idTest;
     }
 
-    public void setIdTest(Test idTest) {
+    public void setIdTest(Long idTest) {
         this.idTest = idTest;
     }
 
@@ -116,11 +111,11 @@ public class TentativoTest {
         this.punteggioTotale = punteggioTotale;
     }
 
-    public List<Risposta> getRisposte() {
-        return risposte;
+    public String getCodiceEsito() {
+
+        return "";
     }
 
-    public void setRisposte(List<Risposta> risposte) {
-        this.risposte = risposte;
+    public void setCodiceEsito(Object o) {
     }
 }

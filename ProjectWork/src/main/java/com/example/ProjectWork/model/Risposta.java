@@ -31,7 +31,7 @@ public class Risposta {
 
     // ===================== COSTRUTTORI =====================
 
-    public Risposta() {
+    public Risposta(int punti, Long idTentativo, Long idDomanda, Long idOpzione) {
     }
 
     public Risposta(

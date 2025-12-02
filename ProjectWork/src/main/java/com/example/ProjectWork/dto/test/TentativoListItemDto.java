@@ -27,6 +27,10 @@ public class TentativoListItemDto {
         this.completatoAt = completatoAt;
     }
 
+    public TentativoListItemDto(Long idTentativo, Integer punteggioTotale, String titoloTest, Integer durataMinuti) {
+
+    }
+
     public Long getIdTentativo() {
         return idTentativo;
     }

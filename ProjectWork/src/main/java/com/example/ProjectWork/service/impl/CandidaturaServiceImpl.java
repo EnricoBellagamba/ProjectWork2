@@ -64,7 +64,16 @@ public class CandidaturaServiceImpl implements CandidaturaService {
         candidatura.setStato(statoIniziale);
         candidatura.setCreatedAT(LocalDate.now());
 
-        return candidaturaRepository.save(candidatura);
+        candidatura = candidaturaRepository.save(candidatura);
+
+        TentativoTest tentativoTest = new TentativoTest();
+        tentativoTest.setIdCandidatura(candidatura.getIdCandidatura());
+        tentativoTest.setIdTest(posizione.getIdTest());
+        tentativoTest.setIniziatoAt(LocalDateTime.now());
+
+        tentativoTestRepository.save(tentativoTest);
+
+        return candidatura;
     }
 
     @Override
@@ -149,7 +158,7 @@ public class CandidaturaServiceImpl implements CandidaturaService {
         return tuttiTentativi.stream()
                 .filter(t -> t.getIdCandidatura() != null
                         && Objects.equals(
-                        t.getIdCandidatura().getIdCandidatura(),
+                        t.getIdCandidatura(),
                         idCandidatura
                 )
                         && t.getCompletatoAt() != null)
