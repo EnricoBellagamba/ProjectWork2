@@ -2,7 +2,9 @@ package com.example.ProjectWork.controller;
 import com.example.ProjectWork.dto.utente.UpdatePasswordRequest;
 import com.example.ProjectWork.dto.utente.UpdateProfiloCandidatoRequest;
 import com.example.ProjectWork.dto.utente.UtenteDto;
+import com.example.ProjectWork.model.EmailBloccata;
 import com.example.ProjectWork.model.Utente;
+import com.example.ProjectWork.repository.EmailBloccataRepository;
 import com.example.ProjectWork.repository.UtenteRepository;
 import com.example.ProjectWork.service.UtenteService;
 import jakarta.validation.Valid;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -28,6 +31,9 @@ public class UtenteController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private EmailBloccataRepository emailBloccataRepository;
 
 
     // GET ALL
@@ -72,10 +78,27 @@ public class UtenteController {
         return ResponseEntity.noContent().build();
     }
 
-    // DELETE
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUtente(@PathVariable Long id) {
-            utenteService.deleteUtente(id);
+
+        Utente utenteDaCancellare = utenteService.getUtenteById(id);
+        String emailDaBloccare = utenteDaCancellare.getEmail();
+
+        LocalDateTime dataEliminazione = LocalDateTime.now();
+        LocalDateTime dataRiabilitazione = dataEliminazione.plusMonths(1); // Un mese dopo l'eliminazione
+
+
+        EmailBloccata emailBloccata = new EmailBloccata();
+
+        emailBloccata.setEmail(emailDaBloccare);
+        emailBloccata.setDataEliminazione(dataEliminazione);
+        emailBloccata.setDataRiabilitazione(dataRiabilitazione);
+
+        emailBloccataRepository.save(emailBloccata);
+
+        utenteService.deleteUtente(id);
+
         return ResponseEntity.noContent().build();
     }
 

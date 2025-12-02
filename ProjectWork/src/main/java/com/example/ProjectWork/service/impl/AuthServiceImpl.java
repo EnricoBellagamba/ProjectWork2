@@ -5,12 +5,16 @@ import com.example.ProjectWork.dto.auth.LoginResponse;
 import com.example.ProjectWork.dto.auth.RegisterRequest;
 import com.example.ProjectWork.dto.utente.UtenteDto;
 import com.example.ProjectWork.exception.*;
+import com.example.ProjectWork.model.EmailBloccata;
 import com.example.ProjectWork.model.Ruolo;
 import com.example.ProjectWork.model.Utente;
+import com.example.ProjectWork.repository.EmailBloccataRepository;
 import com.example.ProjectWork.repository.RuoloRepository;
 import com.example.ProjectWork.repository.UtenteRepository;
 import com.example.ProjectWork.security.JwtService;
 import com.example.ProjectWork.service.AuthService;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -23,6 +27,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.Optional;
 import java.util.UUID;
@@ -33,20 +38,49 @@ public class AuthServiceImpl implements AuthService {
     private final UtenteRepository utenteRepository;
     private final RuoloRepository ruoloRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService;   // <<--- AGGIUNTO
+    private final JwtService jwtService;
+    private final EmailBloccataRepository emailBloccataRepository;
 
     public AuthServiceImpl(UtenteRepository utenteRepository,
                            RuoloRepository ruoloRepository,
                            PasswordEncoder passwordEncoder,
-                           JwtService jwtService) { // <<--- AGGIUNTO
+                           JwtService jwtService,
+                           EmailBloccataRepository emailBloccataRepository) {
         this.utenteRepository = utenteRepository;
         this.ruoloRepository = ruoloRepository;
         this.passwordEncoder = passwordEncoder;
-        this.jwtService = jwtService; // <<--- AGGIUNTO
+        this.jwtService = jwtService;
+        this.emailBloccataRepository = emailBloccataRepository;
     }
 
     @Override
+    @Transactional
     public LoginResponse register(RegisterRequest req, MultipartFile cvFile) throws IOException {
+
+        Optional<EmailBloccata> optionalBloccata = emailBloccataRepository.findByEmail(req.getEmail());
+
+        if (optionalBloccata.isPresent()) {
+            EmailBloccata bloccata = optionalBloccata.get();
+            LocalDateTime dataRiabilitazione = bloccata.getDataRiabilitazione();
+            LocalDateTime now = LocalDateTime.now();
+
+            if (dataRiabilitazione != null) {
+
+                if (now.isBefore(dataRiabilitazione)) {
+
+                    throw new EmailBloccataException(
+                            "La mail è temporaneamente bloccata. La preghiamo di contattare il nostro servizio clienti."
+                    );
+                }
+
+                if (now.isAfter(dataRiabilitazione) || now.isEqual(dataRiabilitazione)) {
+                    emailBloccataRepository.delete(bloccata);
+                }
+            }
+            else {
+                throw new EmailBloccataException("La mail è nella nostra lista di mail bloccate. La preghiamo di contattare il nostro servizio clienti.");
+            }
+        }
 
         if (req == null) throw new IllegalArgumentException("Dati di registrazione mancanti.");
         if (req.getPassword() == null || req.getPassword().isBlank())
@@ -59,7 +93,7 @@ public class AuthServiceImpl implements AuthService {
         Ruolo ruolo = ruoloRepository.findByCodice(req.getRuolo())
                 .orElseThrow(RuoloNonValidoException::new);
 
-        // CV
+
         if (cvFile != null && !cvFile.isEmpty()) {
             String cvUrl = salvaCvSuFileSystem(cvFile);
             req.setCvUrl(cvUrl);
@@ -73,7 +107,6 @@ public class AuthServiceImpl implements AuthService {
         u.setConsensoPrivacy(req.isConsensoPrivacy());
         u.setIdRuolo(ruolo);
 
-        // Data di nascita
         if (req.getDataNascita() != null && !req.getDataNascita().isBlank()) {
             try {
                 u.setDataNascita(LocalDate.parse(req.getDataNascita()));
@@ -95,7 +128,6 @@ public class AuthServiceImpl implements AuthService {
 
         UtenteDto userDto = UtenteDto.fromEntity(saved);
 
-        // GENERO I TOKEN REALI
         String accessToken = jwtService.generateAccessToken(saved);
         String refreshToken = jwtService.generateRefreshToken(saved);
 
