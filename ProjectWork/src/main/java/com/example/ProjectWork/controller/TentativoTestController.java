@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -55,7 +56,9 @@ public class TentativoTestController {
         // 1) utente loggato
         String email = authentication.getName();
         Utente utente = utenteRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Utente non trovato"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utente non trovato"));
+
+        // ... logica per recuperare i tentativi ...
 
         // 2) candidature di QUESTO utente
         List<Candidatura> candidatureUtente = candidaturaRepository.findByCandidato_IdUtente(utente);
@@ -108,7 +111,6 @@ public class TentativoTestController {
                             test != null ? test.getTitolo() : null,
                             test != null ? test.getDurataMinuti() : null,
                             t.getPunteggioTotale(),
-                            test != null ? test.getPunteggioMax() : null,
                             t.getIdEsitoTentativo() != null
                                     ? t.getIdEsitoTentativo().getCodice()
                                     : "IN_VALUTAZIONE",
@@ -137,16 +139,16 @@ public class TentativoTestController {
         // 1) utente loggato
         String email = authentication.getName();
         Utente utente = utenteRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Utente non trovato"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utente non trovato"));
 
         // 2) candidato associato all'utente
         Candidato candidato = candidatoRepository.findByIdUtente(utente)
-                .orElseThrow(() -> new RuntimeException("Profilo candidato non trovato per questo utente"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Profilo candidato non trovato per questo utente"));
 
         // 3) candidature di questo candidato
         List<Candidatura> candidatureUtente = candidaturaRepository.findByCandidato_IdUtente(utente);
         if (candidatureUtente.isEmpty()) {
-            throw new RuntimeException("Non hai candidature attive per poter svolgere il test");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Non hai candidature attive per poter svolgere il test");
         }
 
         // per ora usiamo la prima candidatura dell'utente
@@ -215,7 +217,7 @@ public class TentativoTestController {
     @PreAuthorize("hasRole('CANDIDATO')")
     public ResponseEntity<GetDomandeResponse> getDomandeTentativo(@PathVariable Long idTentativo) {
         TentativoTest tentativo = tentativoTestRepository.findById(idTentativo)
-                .orElseThrow(() -> new RuntimeException("Tentativo non trovato."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tentativo non trovato."));
         Test test = tentativo.getIdTest();
         List<Domanda> domande = domandaRepository.findByTest_IdTest(test.getIdTest());
 
@@ -243,51 +245,75 @@ public class TentativoTestController {
             @PathVariable Long idTentativo,
             @RequestBody InviaRisposteRequest request
     ) {
+        // 1. Validazione input base
         if (request == null) {
-            throw new RuntimeException("Request vuota");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Request vuota");
         }
+        // Se il tuo DTO ha questo setter, usalo, altrimenti è superfluo se usi l'ID nel path
         request.setIdTentativo(idTentativo);
 
+        // 2. Recupera Tentativo e Test
         TentativoTest tentativo = tentativoTestRepository.findById(idTentativo)
-                .orElseThrow(() -> new RuntimeException("Tentativo non trovato."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tentativo non trovato."));
+
         Test test = tentativo.getIdTest();
 
-        // cancella eventuali risposte precedenti per questo tentativo
-        rispostaRepository.deleteAll(
-                rispostaRepository.findByIdTentativo_IdTentativo(idTentativo)
-        );
-
-        List<Domanda> domandeTest = domandaRepository.findByTest_IdTest(test.getIdTest());
-        int numeroDomande = domandeTest.size() > 0 ? domandeTest.size() : 1;
-        int puntiPerDomanda = test.getPunteggioMax() / numeroDomande;
-        int punteggioTotale = 0;
-
-        for (InviaRisposteRequest.RispostaInput input : request.getRisposte()) {
-            Domanda domanda = domandaRepository.findById(input.getIdDomanda())
-                    .orElseThrow(() -> new RuntimeException("Domanda non trovata."));
-            Opzione opzione = input.getIdOpzione() != null
-                    ? opzioneRepository.findById(input.getIdOpzione()).orElse(null)
-                    : null;
-
-            boolean corretta = opzione != null && Boolean.TRUE.equals(opzione.getIsCorretta());
-            if (corretta) {
-                punteggioTotale += puntiPerDomanda;
-            }
-
-            Risposta risposta = new Risposta(puntiPerDomanda, tentativo, domanda, opzione);
-            rispostaRepository.save(risposta);
+        // 3. Reset: cancella risposte precedenti se l'utente sta ritentando lo stesso tentativo (opzionale, ma pulito)
+        List<Risposta> rispostePrecedenti = rispostaRepository.findByIdTentativo_IdTentativo(idTentativo);
+        if (!rispostePrecedenti.isEmpty()) {
+            rispostaRepository.deleteAll(rispostePrecedenti);
         }
 
+        int punteggioTotale = 0;
+
+        // VALORE FISSO DELLA DOMANDA
+        // Poiché Domanda non ha un campo punteggio, usiamo un valore standard.
+        // MODIFICA '1' SE VUOI ASSEGNARE PIÙ PUNTI A DOMANDA.
+        final int PUNTI_PER_DOMANDA = 1;
+
+        // 4. Ciclo sulle risposte inviate
+        if (request.getRisposte() != null) {
+            for (InviaRisposteRequest.RispostaInput input : request.getRisposte()) {
+
+                // A. Trova la domanda
+                Domanda domanda = domandaRepository.findById(input.getIdDomanda())
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Domanda non trovata id: " + input.getIdDomanda()));
+
+                // B. Trova l'opzione scelta (gestisce il caso null se l'utente non ha risposto)
+                Opzione opzione = input.getIdOpzione() != null
+                        ? opzioneRepository.findById(input.getIdOpzione()).orElse(null)
+                        : null;
+
+                // C. Verifica se è corretta
+                boolean isCorretta = opzione != null && Boolean.TRUE.equals(opzione.getIsCorretta());
+
+                // D. Calcola i punti assegnati (Punti pieni se corretta, 0 se errata/null)
+                // Questa era la riga che causava l'errore di compilazione
+                int punteggioAssegnato = isCorretta ? PUNTI_PER_DOMANDA : 0;
+
+                // E. Aggiorna il totale
+                punteggioTotale += punteggioAssegnato;
+
+                // F. Salva la Risposta nel DB
+                Risposta risposta = new Risposta(punteggioAssegnato, tentativo, domanda, opzione);
+                rispostaRepository.save(risposta);
+            }
+        }
+
+        // 5. Aggiorna il Tentativo
         tentativo.setPunteggioTotale(punteggioTotale);
         tentativo.setCompletatoAt(LocalDateTime.now());
+
+        // Calcola esito
+        String esito = punteggioTotale >= test.getPunteggioMin() ? "SUPERATO" : "NON_SUPERATO";
+        // es: tentativo.setEsito(esito);
+
         tentativoTestRepository.save(tentativo);
 
-        String esito = punteggioTotale >= test.getPunteggioMin() ? "SUPERATO" : "NON_SUPERATO";
-
+        // 6. Costruisci la risposta per il client
         InviaRisposteResponse response = new InviaRisposteResponse(
                 tentativo.getIdTentativo(),
                 punteggioTotale,
-                test.getPunteggioMax(),
                 esito
         );
 
@@ -299,18 +325,20 @@ public class TentativoTestController {
     @PreAuthorize("hasRole('CANDIDATO')")
     public ResponseEntity<RisultatoTentativoDettaglioDto> getRisultatoTentativo(@PathVariable Long idTentativo) {
         TentativoTest tentativo = tentativoTestRepository.findById(idTentativo)
-                .orElseThrow(() -> new RuntimeException("Tentativo non trovato."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tentativo non trovato."));
         Test test = tentativo.getIdTest();
 
         List<Risposta> risposte = rispostaRepository.findByIdTentativo_IdTentativo(idTentativo);
         int numeroDomande = domandaRepository.findByTest_IdTest(test.getIdTest()).size();
+
+        // Calcolo delle risposte (corrette/errate) basato sulla presenza e correttezza dell'opzione scelta
         int corrette = (int) risposte.stream()
                 .filter(r -> r.getIdOpzione() != null && Boolean.TRUE.equals(r.getIdOpzione().getIsCorretta()))
                 .count();
         int errate = (int) risposte.stream()
                 .filter(r -> r.getIdOpzione() != null && !Boolean.TRUE.equals(r.getIdOpzione().getIsCorretta()))
                 .count();
-        int nonRisposte = Math.max(0, numeroDomande - corrette - errate);
+        int nonRisposte = Math.max(0, numeroDomande - (corrette + errate));
 
         String esito = tentativo.getIdEsitoTentativo() == null
                 ? "IN_VALUTAZIONE"
@@ -321,7 +349,6 @@ public class TentativoTestController {
                 test.getIdTest(),
                 test.getTitolo(),
                 tentativo.getPunteggioTotale(),
-                test.getPunteggioMax(),
                 test.getPunteggioMin(),
                 esito,
                 tentativo.getCompletatoAt() != null ? tentativo.getCompletatoAt().toString() : null,
@@ -356,7 +383,7 @@ public class TentativoTestController {
 
         int numeroDomande = domandaDtos.size();
         Integer punteggioMin = test.getPunteggioMin();
-        String tipo = null;
+        String tipo = test.getTipoTest() != null ? test.getTipoTest().getCodice() : null; // Assumendo che 'tipo' sia un campo Codice nell'Entity TipoTest
 
         StrutturaTestResponse resp = new StrutturaTestResponse(
                 test.getIdTest(),
@@ -364,7 +391,6 @@ public class TentativoTestController {
                 test.getDescrizione(),
                 test.getDurataMinuti(),
                 numeroDomande,
-                test.getPunteggioMax(),
                 punteggioMin,
                 tipo,
                 domandaDtos

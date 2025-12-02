@@ -6,9 +6,8 @@ public class TestCreateRequest {
 
     public String titolo;
     public String descrizione;
-    public Integer durataMinuti;
+    public Integer durataMinuti = 20;
     public Integer numeroDomande;
-    public Integer punteggioMax;
     public Integer punteggioMin;
 
     // codice del tipo test (SOFT_SKILLS, TECNICO, ecc.)

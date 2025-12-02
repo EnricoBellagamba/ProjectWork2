@@ -8,7 +8,6 @@ public class StrutturaTestResponse {
     private String descrizione;
     private Integer durataMinuti;
     private Integer numeroDomande;
-    private Integer punteggioMax;
     private Integer punteggioMin;
     private String tipo;
     private List<DomandaDto> domande;
@@ -19,7 +18,6 @@ public class StrutturaTestResponse {
             String descrizione,
             Integer durataMinuti,
             Integer numeroDomande,
-            Integer punteggioMax,
             Integer punteggioMin,
             String tipo,
             List<DomandaDto> domande
@@ -29,7 +27,6 @@ public class StrutturaTestResponse {
         this.descrizione = descrizione;
         this.durataMinuti = durataMinuti;
         this.numeroDomande = numeroDomande;
-        this.punteggioMax = punteggioMax;
         this.punteggioMin = punteggioMin;
         this.tipo = tipo;
         this.domande = domande;
@@ -53,10 +50,6 @@ public class StrutturaTestResponse {
 
     public Integer getNumeroDomande() {
         return numeroDomande;
-    }
-
-    public Integer getPunteggioMax() {
-        return punteggioMax;
     }
 
     public Integer getPunteggioMin() {

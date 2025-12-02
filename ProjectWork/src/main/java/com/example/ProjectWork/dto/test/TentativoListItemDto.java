@@ -6,7 +6,6 @@ public class TentativoListItemDto {
     private String titoloTest;
     private Integer durataMinuti;
     private Integer punteggioTotale;
-    private Integer punteggioMax;
     private String esito;
     private String completatoAt;
 
@@ -16,7 +15,6 @@ public class TentativoListItemDto {
             String titoloTest,
             Integer durataMinuti,
             Integer punteggioTotale,
-            Integer punteggioMax,
             String esito,
             String completatoAt
     ) {
@@ -25,7 +23,6 @@ public class TentativoListItemDto {
         this.titoloTest = titoloTest;
         this.durataMinuti = durataMinuti;
         this.punteggioTotale = punteggioTotale;
-        this.punteggioMax = punteggioMax;
         this.esito = esito;
         this.completatoAt = completatoAt;
     }
@@ -48,10 +45,6 @@ public class TentativoListItemDto {
 
     public Integer getPunteggioTotale() {
         return punteggioTotale;
-    }
-
-    public Integer getPunteggioMax() {
-        return punteggioMax;
     }
 
     public String getEsito() {

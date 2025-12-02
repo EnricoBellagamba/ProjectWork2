@@ -6,22 +6,19 @@ public class TestListItemDto {
     private String tipo; // opzionale
     private Integer durataMinuti;
     private String descrizione;
-    private Integer punteggioMax;
 
     public TestListItemDto(
             Long idTest,
             String titolo,
             String tipo,
             Integer durataMinuti,
-            String descrizione,
-            Integer punteggioMax
+            String descrizione
     ) {
         this.idTest = idTest;
         this.titolo = titolo;
         this.tipo = tipo;
         this.durataMinuti = durataMinuti;
         this.descrizione = descrizione;
-        this.punteggioMax = punteggioMax;
     }
 
     public Long getIdTest() {
@@ -44,7 +41,4 @@ public class TestListItemDto {
         return descrizione;
     }
 
-    public Integer getPunteggioMax() {
-        return punteggioMax;
-    }
 }

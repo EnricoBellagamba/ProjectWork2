@@ -82,24 +82,8 @@ public class TestController {
         //    (paracadute extra prima di arrivare alla service)
         // -------------------------
 
-        // punteggioMin: se null o negativo -> 0
-        if (req.punteggioMin == null || req.punteggioMin < 0) {
-            req.punteggioMin = 0;
-        }
-
-        // punteggioMax: se null, <=0 o >100 -> 100
-        if (req.punteggioMax == null || req.punteggioMax <= 0 || req.punteggioMax > 100) {
-            req.punteggioMax = 100;
-        }
-
-        // durataMinuti e numeroDomande li validiamo in service,
+        // numeroDomande li validiamo in service,
         // ma se proprio arrivano null lanciamo errore chiaro qui
-        if (req.durataMinuti == null) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "durataMinuti è obbligatoria"
-            );
-        }
         if (req.numeroDomande == null) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
@@ -135,15 +119,6 @@ public class TestController {
             punteggioTotaleDomande += d.punteggio;
         }
 
-        // Vincolo Principale: Il punteggio totale raggiungibile NON DEVE ESSERE inferiore a punteggioMax
-        if (punteggioTotaleDomande < req.punteggioMax) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Il punteggio massimo del test inserito (" + req.punteggioMax +
-                            ") non è raggiungibile. Il punteggio massimo ottenibile dalla somma delle domande è solo " + punteggioTotaleDomande + "."
-            );
-        }
-
         // -------------------------
         // 3) CREA TEST BASE
         //    (i vincoli su durata, domande e punteggi li applica poi il service)
@@ -153,7 +128,6 @@ public class TestController {
         test.setDescrizione(req.descrizione);
         test.setDurataMinuti(req.durataMinuti);
         test.setNumeroDomande(req.numeroDomande);
-        test.setPunteggioMax(req.punteggioMax);
         test.setPunteggioMin(req.punteggioMin);
 
         // imposta il tipo test scelto
@@ -165,9 +139,6 @@ public class TestController {
         // Questo applica default (punteggi) + vincoli (durata, domande, punteggi)
         Test savedTest = testService.createTest(test);
 
-        // -------------------------
-        // 4) CREA DOMANDE + OPZIONI
-        // -------------------------
         // -------------------------
         // 4) CREA DOMANDE + OPZIONI
         // -------------------------
@@ -226,8 +197,7 @@ public class TestController {
                         t.getTitolo(),
                         t.getTipoTest() != null ? t.getTipoTest().getCodice() : null,
                         t.getDurataMinuti(),
-                        t.getDescrizione(),
-                        t.getPunteggioMax()
+                        t.getDescrizione()
                 ))
                 .collect(Collectors.toList());
 
@@ -296,7 +266,6 @@ public class TestController {
                 test.getDescrizione(),
                 test.getDurataMinuti(),
                 numeroDomandeReali,
-                test.getPunteggioMax(),
                 test.getPunteggioMin(),
                 tipoCodice,
                 domandaDtos

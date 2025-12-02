@@ -27,10 +27,6 @@ public class Test {
     @Column(nullable = false)
     private Integer numeroDomande;
 
-    @Max(value = 100, message = "Punteggio massimo per test 100")
-    @Column(nullable = false)
-    private Integer punteggioMax;
-
     @Min(value = 0, message = "Punteggio minimo per test 0")
     @Column(nullable = false)
     private Integer punteggioMin;
@@ -80,14 +76,6 @@ public class Test {
 
     public void setNumeroDomande(Integer numeroDomande) {
         this.numeroDomande = numeroDomande;
-    }
-
-    public Integer getPunteggioMax() {
-        return punteggioMax;
-    }
-
-    public void setPunteggioMax(Integer punteggioMax) {
-        this.punteggioMax = punteggioMax;
     }
 
     public Integer getPunteggioMin() {

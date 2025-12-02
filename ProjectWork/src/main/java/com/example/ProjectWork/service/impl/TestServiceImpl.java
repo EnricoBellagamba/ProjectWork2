@@ -67,7 +67,6 @@ public class TestServiceImpl implements TestService {
         existingTest.setDescrizione(testDetails.getDescrizione());
         existingTest.setDurataMinuti(testDetails.getDurataMinuti());
         existingTest.setNumeroDomande(testDetails.getNumeroDomande());
-        existingTest.setPunteggioMax(testDetails.getPunteggioMax());
         existingTest.setPunteggioMin(testDetails.getPunteggioMin());
         existingTest.setAttivo(testDetails.getAttivo());
 
@@ -116,7 +115,6 @@ public class TestServiceImpl implements TestService {
         Integer durata = test.getDurataMinuti();
         Integer numeroDomande = test.getNumeroDomande();
         Integer pMin = test.getPunteggioMin();
-        Integer pMax = test.getPunteggioMax();
 
         // Default punteggio minimo: 0
         if (pMin == null || pMin < 0) {
@@ -124,13 +122,7 @@ public class TestServiceImpl implements TestService {
             test.setPunteggioMin(pMin);
         }
 
-        // Default punteggio massimo: 100
-        if (pMax == null || pMax <= 0 || pMax > 100) {
-            pMax = 100;
-            test.setPunteggioMax(pMax);
-        }
-
-        validateTestBusinessRules(durata, numeroDomande, pMin, pMax);
+        validateTestBusinessRules(durata, numeroDomande, pMin);
     }
 
     /**
@@ -138,8 +130,7 @@ public class TestServiceImpl implements TestService {
      */
     private void validateTestBusinessRules(Integer durataMinuti,
                                            Integer numeroDomande,
-                                           Integer punteggioMin,
-                                           Integer punteggioMax) {
+                                           Integer punteggioMin) {
 
         // Durata obbligatoria, tra 1 e 60
         if (durataMinuti == null) {
@@ -180,28 +171,6 @@ public class TestServiceImpl implements TestService {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Il punteggio minimo non può essere negativo (minimo 0)"
-            );
-        }
-
-        // Punteggio massimo <= 100
-        if (punteggioMax == null) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Il punteggio massimo (punteggioMax) non può essere null"
-            );
-        }
-        if (punteggioMax > 100) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Il punteggio massimo non può superare 100"
-            );
-        }
-
-        // Coerenza tra min e max
-        if (punteggioMax < punteggioMin) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Il punteggio massimo deve essere maggiore o uguale al punteggio minimo"
             );
         }
     }
