@@ -222,7 +222,7 @@ public class TentativoTestController {
                         t.getIdTentativo(),
                         t.getPunteggioTotale(),
                         t.getCodiceEsito(),
-                        t.getCompletatoAt() != null ? Integer.valueOf(t.getCompletatoAt().toString()) : null
+                        t.getCompletatoAt()
                 ))
                 .toList();
 
