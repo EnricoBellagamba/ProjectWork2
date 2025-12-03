@@ -30,6 +30,8 @@ public class Risposta {
     private Opzione idOpzione; // scelta
 
     // ===================== COSTRUTTORI =====================
+    public Risposta() {}
+
 
     public Risposta(int punti, Long idTentativo, Long idDomanda, Long idOpzione) {
     }

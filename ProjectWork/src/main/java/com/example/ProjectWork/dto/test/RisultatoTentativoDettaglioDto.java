@@ -1,5 +1,7 @@
 package com.example.ProjectWork.dto.test;
 
+import java.time.LocalDate;
+
 public class RisultatoTentativoDettaglioDto {
     private Long idTentativo;
     private Long idTest;
@@ -7,7 +9,7 @@ public class RisultatoTentativoDettaglioDto {
     private Integer punteggioTotale;
     private Integer punteggioMin;
     private String esito;
-    private String completatoAt;
+    private LocalDate completatoAt;
     private Integer durataUsataMinuti;
     private Integer numeroDomande;
     private Integer numeroCorrette;
@@ -21,7 +23,7 @@ public class RisultatoTentativoDettaglioDto {
             Integer punteggioTotale,
             Integer punteggioMin,
             String esito,
-            String completatoAt,
+            LocalDate completatoAt,
             Integer durataUsataMinuti,
             Integer numeroDomande,
             Integer numeroCorrette,
@@ -66,7 +68,7 @@ public class RisultatoTentativoDettaglioDto {
         return esito;
     }
 
-    public String getCompletatoAt() {
+    public LocalDate getCompletatoAt() {
         return completatoAt;
     }
 

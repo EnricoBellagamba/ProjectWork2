@@ -5,7 +5,11 @@ public class InviaRisposteResponse {
     private Integer punteggioTotale;
     private String esito;
 
-    public InviaRisposteResponse(Long idTentativo, int punteggioTotale, String codiceEsito) {}
+    public InviaRisposteResponse(Long idTentativo, int punteggioTotale, String codiceEsito) {
+        this.idTentativo = idTentativo;
+        this.punteggioTotale = punteggioTotale;
+        this.esito = codiceEsito;
+    }
 
     public InviaRisposteResponse(Long idTentativo, Integer punteggioTotale, Integer punteggioMax, String esito) {
         this.idTentativo = idTentativo;

@@ -438,7 +438,7 @@ public class TentativoTestController {
                         t.getPunteggioTotale(),
                         test.getPunteggioMin(),
                         t.getCodiceEsito(),
-                        t.getCompletatoAt() != null ? t.getCompletatoAt().toString() : null,
+                        t.getCompletatoAt() != null ? t.getCompletatoAt().toLocalDate() : null,
                         null,
                         numeroDomande,
                         (int) corrette,
