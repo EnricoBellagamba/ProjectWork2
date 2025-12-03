@@ -43,9 +43,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/candidati/**").hasRole("CANDIDATO")
                         .requestMatchers("/api/posizioni/**").hasAnyRole("CANDIDATO", "HR")
                         .requestMatchers("/api/utenti/**").permitAll()
-
+                        // Rimuovi questa linea: .requestMatchers("/api/candidature/**").permitAll()
                         .anyRequest().authenticated()
                 )
+
 
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
