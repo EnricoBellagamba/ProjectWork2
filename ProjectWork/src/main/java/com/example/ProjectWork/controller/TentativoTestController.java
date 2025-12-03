@@ -8,9 +8,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import com.example.ProjectWork.dto.test.CompletaTestRequest;
 
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -28,6 +32,10 @@ public class TentativoTestController {
     private final UtenteRepository utenteRepository;
     private final CandidatoRepository candidatoRepository;
     private final TestRepository testRepository;
+    private final PosizioneRepository posizioneRepository;
+    private final StatoCandidaturaRepository statoCandidaturaRepository;
+    private final EsitoTentativoRepository esitoTentativoRepository;
+
 
     public TentativoTestController(
             TestService testService,
@@ -38,7 +46,7 @@ public class TentativoTestController {
             CandidaturaRepository candidaturaRepository,
             UtenteRepository utenteRepository,
             CandidatoRepository candidatoRepository,
-            TestRepository testRepository
+            TestRepository testRepository, PosizioneRepository posizioneRepository, StatoCandidaturaRepository statoCandidaturaRepository, EsitoTentativoRepository esitoTentativoRepository
     ) {
         this.testService = testService;
         this.domandaRepository = domandaRepository;
@@ -49,7 +57,121 @@ public class TentativoTestController {
         this.utenteRepository = utenteRepository;
         this.candidatoRepository = candidatoRepository;
         this.testRepository = testRepository;
+        this.posizioneRepository = posizioneRepository;
+        this.statoCandidaturaRepository = statoCandidaturaRepository;
+        this.esitoTentativoRepository = esitoTentativoRepository;
     }
+
+    // TentativoTestController.java
+
+    @PostMapping("/completa")
+    @PreAuthorize("hasRole('CANDIDATO')")
+    @Transactional
+    public ResponseEntity<InviaRisposteResponse> completaTestECandidatura(
+            @RequestBody CompletaTestRequest request,
+            Authentication authentication
+    ) {
+        if (request == null) {
+            throw new RuntimeException("Request vuota");
+        }
+
+        // 1) Recupera utente loggato
+        String email = authentication.getName();
+        Utente utente = utenteRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utente non trovato"));
+
+        // 2) Recupera o crea il profilo candidato
+        Candidato candidato = candidatoRepository.findByIdUtente(utente)
+                .orElseGet(() -> {
+                    Candidato nuovo = new Candidato();
+                    nuovo.setIdUtente(utente);
+                    nuovo.setActive(true);
+                    return candidatoRepository.save(nuovo);
+                });
+
+        // 3) Recupera test e posizione
+        Test test = testService.getTestById(request.getIdTest());
+        Posizione posizione = posizioneRepository.findById(request.getIdPosizione())
+                .orElseThrow(() -> new RuntimeException("Posizione non trovata"));
+
+        // 4) Verifica che non esista già una candidatura per questa posizione
+        boolean esisteCandidatura = candidaturaRepository
+                .existsByCandidato_IdCandidatoAndPosizione_IdPosizione(
+                        candidato.getIdCandidato(),
+                        request.getIdPosizione()
+                );
+
+        if (esisteCandidatura) {
+            throw new RuntimeException("Hai già una candidatura attiva per questa posizione");
+        }
+
+        // ✅ 5) CREA LA CANDIDATURA
+        StatoCandidatura statoIniziale = statoCandidaturaRepository.findByCodice("IN_VALUTAZIONE")
+                .orElseThrow(() -> new RuntimeException("Stato 'IN_VALUTAZIONE' non trovato"));
+
+        Candidatura candidatura = new Candidatura();
+        candidatura.setCandidato(candidato);
+        candidatura.setPosizione(posizione);
+        candidatura.setStato(statoIniziale);
+        candidatura.setCreatedAT(LocalDate.now());
+
+        candidatura = candidaturaRepository.save(candidatura);
+        Long idCandidatura = candidatura.getIdCandidatura();
+
+        // ✅ 6) CREA IL TENTATIVO TEST
+        TentativoTest tentativo = new TentativoTest();
+        tentativo.setIdCandidatura(idCandidatura);
+        tentativo.setIdTest(test.getIdTest());
+        tentativo.setIniziatoAt(request.getIniziatoAt());
+        tentativo.setCompletatoAt(LocalDateTime.now());
+
+        TentativoTest tentativoSalvato = tentativoTestRepository.save(tentativo);
+
+        // ✅ 7) CALCOLA PUNTEGGIO con punteggio FISSO = 1 per risposta corretta
+        List<Domanda> domandeTest = domandaRepository.findByTest_IdTest(test.getIdTest());
+        int punteggioTotale = 0;
+        final int PUNTI_PER_DOMANDA = 1; // ✅ Punteggio fisso
+
+        for (CompletaTestRequest.RispostaInput input : request.getRisposte()) {
+            Domanda domanda = domandaRepository.findById(input.getIdDomanda())
+                    .orElseThrow(() -> new RuntimeException("Domanda non trovata"));
+
+            Opzione opzione = input.getIdOpzione() != null
+                    ? opzioneRepository.findById(input.getIdOpzione()).orElse(null)
+                    : null;
+
+            boolean corretta = opzione != null && Boolean.TRUE.equals(opzione.getIsCorretta());
+            if (corretta) {
+                punteggioTotale += PUNTI_PER_DOMANDA; // ✅ Usa punteggio fisso
+            }
+
+            Risposta risposta = new Risposta(PUNTI_PER_DOMANDA, tentativoSalvato, domanda, opzione);
+            rispostaRepository.save(risposta);
+        }
+
+        // ✅ 8) AGGIORNA PUNTEGGIO ED ESITO
+        tentativoSalvato.setPunteggioTotale(punteggioTotale);
+
+        // ✅ Calcola esito in base al punteggio minimo del test
+        String codiceEsito = punteggioTotale >= test.getPunteggioMin() ? "SUPERATO" : "NON_SUPERATO";
+        EsitoTentativo esito = esitoTentativoRepository.findByCodice(codiceEsito)
+                .orElse(null);
+        tentativoSalvato.setIdEsitoTentativo(esito);
+
+        tentativoTestRepository.save(tentativoSalvato);
+
+        // ✅ 9) RISPOSTA
+        InviaRisposteResponse response = new InviaRisposteResponse(
+                tentativoSalvato.getIdTentativo(),
+                punteggioTotale,
+                codiceEsito
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+
+
 
     // =============================================================
     //   STORICO TENTATIVI DELL’UTENTE LOGGATO
@@ -209,6 +331,29 @@ public class TentativoTestController {
         );
     }
 
+
+    @GetMapping("/{idTest}/domande")
+    @PreAuthorize("hasRole('CANDIDATO')")
+    public ResponseEntity<GetDomandeResponse> getDomandeTest(@PathVariable Long idTest) {
+        Test test = testService.getTestById(idTest);
+        List<Domanda> domande = domandaRepository.findByTest_IdTest(idTest);
+
+        List<DomandaDto> domandaDtos = domande.stream().map(domanda -> {
+            List<Opzione> opzioni = opzioneRepository.findByDomanda_IdDomanda(domanda.getIdDomanda());
+            List<OpzioneDto> opzioneDtos = opzioni.stream()
+                    .map(o -> new OpzioneDto(o.getIdOpzione(), o.getTestoOpzione(), null)) // ✅ NON esporre isCorretta
+                    .collect(Collectors.toList());
+            return new DomandaDto(domanda.getIdDomanda(), domanda.getTesto(), opzioneDtos);
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(new GetDomandeResponse(
+                null, // Nessun idTentativo
+                test.getIdTest(),
+                test.getTitolo(),
+                test.getDurataMinuti(),
+                domandaDtos
+        ));
+    }
 
     // =============================================================
     //   INVIO RISPOSTE

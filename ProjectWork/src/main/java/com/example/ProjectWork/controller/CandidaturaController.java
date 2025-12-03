@@ -4,8 +4,11 @@ import com.example.ProjectWork.dto.candidatura.CandidaturaMiaDto;
 import com.example.ProjectWork.dto.candidatura.NuovaCandidaturaRequest;
 import com.example.ProjectWork.model.Candidato;
 import com.example.ProjectWork.model.Candidatura;
+import com.example.ProjectWork.model.Posizione;
 import com.example.ProjectWork.model.Utente;
 import com.example.ProjectWork.repository.CandidatoRepository;
+import com.example.ProjectWork.repository.CandidaturaRepository;
+import com.example.ProjectWork.repository.PosizioneRepository;
 import com.example.ProjectWork.repository.UtenteRepository;
 import com.example.ProjectWork.service.CandidaturaService;
 import org.springframework.http.HttpStatus;
@@ -15,7 +18,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/candidature")
@@ -24,13 +29,17 @@ public class CandidaturaController {
     private final CandidaturaService candidaturaService;
     private final UtenteRepository utenteRepository;
     private final CandidatoRepository candidatoRepository;
+    private final PosizioneRepository posizioneRepository;
+    private final CandidaturaRepository candidaturaRepository;
 
     public CandidaturaController(CandidaturaService candidaturaService,
                                  UtenteRepository utenteRepository,
-                                 CandidatoRepository candidatoRepository) {
+                                 CandidatoRepository candidatoRepository, PosizioneRepository posizioneRepository, CandidaturaRepository candidaturaRepository) {
         this.candidaturaService = candidaturaService;
         this.utenteRepository = utenteRepository;
         this.candidatoRepository = candidatoRepository;
+        this.posizioneRepository = posizioneRepository;
+        this.candidaturaRepository = candidaturaRepository;
     }
 
     @GetMapping
@@ -44,36 +53,49 @@ public class CandidaturaController {
                 .body(candidaturaService.getCandidaturaById(id));
     }
 
+    // CandidaturaController.java
+
     @PostMapping
     @PreAuthorize("hasRole('CANDIDATO')")
-    public ResponseEntity<Candidatura> createCandidatura(
+    public ResponseEntity<Map<String, String>> createCandidatura(
             @RequestBody NuovaCandidaturaRequest request,
             Authentication authentication
     ) {
-        // 1. Dal token ricavo l'email dell'utente loggato
+        // ✅ NON creare nulla, solo verifica che l'utente esista
         String email = authentication.getName();
         Utente utente = utenteRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Utente non trovato"));
 
-        // 2. CERCO il profilo candidato per questo utente, se NON esiste lo creo
-        Candidato candidato = candidatoRepository.findByIdUtente(utente)
-                .orElseGet(() -> {
-                    Candidato nuovo = new Candidato();
-                    nuovo.setIdUtente(utente);
-                    nuovo.setActive(true);
-                    return candidatoRepository.save(nuovo);
-                });
+        // ✅ Verifica che la posizione esista
+        Posizione posizione = posizioneRepository.findById(request.getIdPosizione())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Posizione non trovata"));
 
-        // Creo la candidatura per questa posizione usando SEMPRE lo stesso idCandidato
-        Candidatura nuova = candidaturaService.createCandidatura(
-                candidato.getIdCandidato(),
-                request.getIdPosizione()
-        );
+        // ✅ Verifica che non ci sia già una candidatura
+        Candidato candidato = candidatoRepository.findByIdUtente(utente).orElse(null);
+        if (candidato != null) {
+            boolean exists = candidaturaRepository
+                    .existsByCandidato_IdCandidatoAndPosizione_IdPosizione(
+                            candidato.getIdCandidato(),
+                            request.getIdPosizione()
+                    );
+            if (exists) {
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "Hai già una candidatura per questa posizione"
+                );
+            }
+        }
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(nuova);
+        // ✅ Restituisci solo un messaggio di successo - NON creare nulla
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Puoi procedere con il test");
+        response.put("idPosizione", request.getIdPosizione().toString());
+        response.put("idTest", posizione.getIdTest() != null ? posizione.getIdTest().toString() : null);
+
+        return ResponseEntity.ok(response);
     }
-
     @GetMapping("/mie")
     @PreAuthorize("hasRole('CANDIDATO')")
     public ResponseEntity<List<CandidaturaMiaDto>> getMieCandidature(Authentication authentication) {
