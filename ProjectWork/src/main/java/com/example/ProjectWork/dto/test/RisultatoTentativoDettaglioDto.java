@@ -1,20 +1,25 @@
 package com.example.ProjectWork.dto.test;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class RisultatoTentativoDettaglioDto {
     private Long idTentativo;
     private Long idTest;
     private String titoloTest;
+    private Double percentuale;
     private Integer punteggioTotale;
     private Integer punteggioMin;
     private String esito;
-    private LocalDate completatoAt;
+    private LocalDateTime completatoAt;
     private Integer durataUsataMinuti;
     private Integer numeroDomande;
     private Integer numeroCorrette;
     private Integer numeroErrate;
     private Integer numeroNonRisposte;
+
+    public RisultatoTentativoDettaglioDto() {
+
+    }
 
     public RisultatoTentativoDettaglioDto(
             Long idTentativo,
@@ -23,7 +28,7 @@ public class RisultatoTentativoDettaglioDto {
             Integer punteggioTotale,
             Integer punteggioMin,
             String esito,
-            LocalDate completatoAt,
+            LocalDateTime completatoAt,
             Integer durataUsataMinuti,
             Integer numeroDomande,
             Integer numeroCorrette,
@@ -68,7 +73,7 @@ public class RisultatoTentativoDettaglioDto {
         return esito;
     }
 
-    public LocalDate getCompletatoAt() {
+    public LocalDateTime getCompletatoAt() {
         return completatoAt;
     }
 
@@ -90,5 +95,57 @@ public class RisultatoTentativoDettaglioDto {
 
     public Integer getNumeroNonRisposte() {
         return numeroNonRisposte;
+    }
+
+    public void setIdTentativo(Long idTentativo) {
+        this.idTentativo = idTentativo;
+    }
+
+    public void setIdTest(Long idTest) {
+        this.idTest = idTest;
+    }
+
+    public void setTitoloTest(String titoloTest) {
+        this.titoloTest = titoloTest;
+    }
+
+    public void setPercentuale(Double percentuale) {
+        this.percentuale = percentuale;
+    }
+
+    public void setPunteggioTotale(Integer punteggioTotale) {
+        this.punteggioTotale = punteggioTotale;
+    }
+
+    public void setPunteggioMin(Integer punteggioMin) {
+        this.punteggioMin = punteggioMin;
+    }
+
+    public void setEsito(String esito) {
+        this.esito = esito;
+    }
+
+    public void setCompletatoAt(LocalDateTime completatoAt) {
+        this.completatoAt = completatoAt;
+    }
+
+    public void setDurataUsataMinuti(Integer durataUsataMinuti) {
+        this.durataUsataMinuti = durataUsataMinuti;
+    }
+
+    public void setNumeroDomande(Integer numeroDomande) {
+        this.numeroDomande = numeroDomande;
+    }
+
+    public void setNumeroCorrette(Integer numeroCorrette) {
+        this.numeroCorrette = numeroCorrette;
+    }
+
+    public void setNumeroErrate(Integer numeroErrate) {
+        this.numeroErrate = numeroErrate;
+    }
+
+    public void setNumeroNonRisposte(Integer numeroNonRisposte) {
+        this.numeroNonRisposte = numeroNonRisposte;
     }
 }

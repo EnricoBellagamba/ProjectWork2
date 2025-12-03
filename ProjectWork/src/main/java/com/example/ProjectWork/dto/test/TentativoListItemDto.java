@@ -1,6 +1,5 @@
 package com.example.ProjectWork.dto.test;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class TentativoListItemDto {
@@ -10,7 +9,12 @@ public class TentativoListItemDto {
     private Integer durataMinuti;
     private Integer punteggioTotale;
     private String esito;
-    private LocalDate completatoAt;
+    private LocalDateTime completatoAt;
+    private Double percentuale;
+
+    public TentativoListItemDto() {
+
+    }
 
     public TentativoListItemDto(
             Long idTentativo,
@@ -19,7 +23,8 @@ public class TentativoListItemDto {
             Integer durataMinuti,
             Integer punteggioTotale,
             String esito,
-            LocalDate completatoAt
+            LocalDateTime completatoAt,
+            Double percentuale
     ) {
         this.idTentativo = idTentativo;
         this.idTest = idTest;
@@ -28,10 +33,14 @@ public class TentativoListItemDto {
         this.punteggioTotale = punteggioTotale;
         this.esito = esito;
         this.completatoAt = completatoAt;
+        this.percentuale = percentuale;
     }
 
-    public TentativoListItemDto(Long idTentativo, Integer punteggioTotale, String titoloTest, LocalDateTime durataMinuti) {
+    public TentativoListItemDto(Long idTentativo, Integer punteggioTotale, String titoloTest, Integer durataMinuti, Double percentuale) {
 
+    }
+
+    public TentativoListItemDto(Long idTentativo, Integer punteggioTotale, String codiceEsito, LocalDateTime completatoAt, Double percentuale) {
     }
 
     public Long getIdTentativo() {
@@ -58,7 +67,7 @@ public class TentativoListItemDto {
         return esito;
     }
 
-    public LocalDate getCompletatoAt() {
+    public LocalDateTime getCompletatoAt() {
         return completatoAt;
     }
 }

@@ -21,7 +21,7 @@ public class EmailBloccata {
     private boolean haTestNonSuperati = false;
 
     @Column
-    private LocalDateTime dataRiabilitazione; // Dopo 6 mesi, se null = mai
+    private LocalDateTime dataRiabilitazione;
 
     public String getEmail() {
         return email;

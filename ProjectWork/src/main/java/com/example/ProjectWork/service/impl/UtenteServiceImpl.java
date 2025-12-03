@@ -98,7 +98,6 @@ public class UtenteServiceImpl implements UtenteService {
         if (cvFile != null && !cvFile.isEmpty()) {
             String cvUrl = salvaCvSuFileSystem(cvFile);
             existing.setCvUrl(cvUrl);
-            // se vuoi resettare l'hash
             existing.setCvHash(null);
         }
         Utente saved = utenteRepository.save(existing);
@@ -123,9 +122,6 @@ public class UtenteServiceImpl implements UtenteService {
         utenteRepository.save(existing);
     }
 
-    /**
-     * Clonato da AuthServiceImpl: salva il CV su filesystem e restituisce l'URL.
-     */
     private String salvaCvSuFileSystem(MultipartFile cvFile) throws IOException {
         if (cvFile == null || cvFile.isEmpty()) {
             return null;

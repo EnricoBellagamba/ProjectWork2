@@ -4,17 +4,15 @@ public class InviaRisposteResponse {
     private Long idTentativo;
     private Integer punteggioTotale;
     private String esito;
+    private Double percentuale;
 
-    public InviaRisposteResponse(Long idTentativo, int punteggioTotale, String codiceEsito) {
-        this.idTentativo = idTentativo;
-        this.punteggioTotale = punteggioTotale;
-        this.esito = codiceEsito;
-    }
+    public InviaRisposteResponse(Long idTentativo, int punteggioTotale, String codiceEsito, Double percentuale) {}
 
-    public InviaRisposteResponse(Long idTentativo, Integer punteggioTotale, Integer punteggioMax, String esito) {
+    public InviaRisposteResponse(Long idTentativo, Integer punteggioTotale, Integer punteggioMax, String esito, Double percentuale) {
         this.idTentativo = idTentativo;
         this.punteggioTotale = punteggioTotale;
         this.esito = esito;
+        this.percentuale = percentuale;
     }
 
     // Getters e Setters
@@ -40,5 +38,13 @@ public class InviaRisposteResponse {
 
     public void setEsito(String esito) {
         this.esito = esito;
+    }
+
+    public Double getPercentuale() {
+        return percentuale;
+    }
+
+    public void setPercentuale(Double percentuale) {
+        this.percentuale = percentuale;
     }
 }

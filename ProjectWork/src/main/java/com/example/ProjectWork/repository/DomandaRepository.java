@@ -16,4 +16,6 @@ public interface DomandaRepository extends JpaRepository<Domanda, Long> {
      *   Domanda.test.idTest
      */
     List<Domanda> findByTest_IdTest(Long idTest);
+
+    int countByTest_IdTest(Long idTest);
 }

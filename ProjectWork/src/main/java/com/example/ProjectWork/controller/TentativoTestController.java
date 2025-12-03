@@ -62,8 +62,6 @@ public class TentativoTestController {
         this.esitoTentativoRepository = esitoTentativoRepository;
     }
 
-    // TentativoTestController.java
-
     @PostMapping("/completa")
     @PreAuthorize("hasRole('CANDIDATO')")
     @Transactional
@@ -75,12 +73,10 @@ public class TentativoTestController {
             throw new RuntimeException("Request vuota");
         }
 
-        // 1) Recupera utente loggato
         String email = authentication.getName();
         Utente utente = utenteRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Utente non trovato"));
 
-        // 2) Recupera o crea il profilo candidato
         Candidato candidato = candidatoRepository.findByIdUtente(utente)
                 .orElseGet(() -> {
                     Candidato nuovo = new Candidato();
@@ -89,12 +85,10 @@ public class TentativoTestController {
                     return candidatoRepository.save(nuovo);
                 });
 
-        // 3) Recupera test e posizione
         Test test = testService.getTestById(request.getIdTest());
         Posizione posizione = posizioneRepository.findById(request.getIdPosizione())
                 .orElseThrow(() -> new RuntimeException("Posizione non trovata"));
 
-        // 4) Verifica che non esista già una candidatura per questa posizione
         boolean esisteCandidatura = candidaturaRepository
                 .existsByCandidato_IdCandidatoAndPosizione_IdPosizione(
                         candidato.getIdCandidato(),
@@ -105,7 +99,6 @@ public class TentativoTestController {
             throw new RuntimeException("Hai già una candidatura attiva per questa posizione");
         }
 
-        // ✅ 5) CREA LA CANDIDATURA
         StatoCandidatura statoIniziale = statoCandidaturaRepository.findByCodice("IN_VALUTAZIONE")
                 .orElseThrow(() -> new RuntimeException("Stato 'IN_VALUTAZIONE' non trovato"));
 
@@ -118,7 +111,6 @@ public class TentativoTestController {
         candidatura = candidaturaRepository.save(candidatura);
         Long idCandidatura = candidatura.getIdCandidatura();
 
-        // ✅ 6) CREA IL TENTATIVO TEST
         TentativoTest tentativo = new TentativoTest();
         tentativo.setIdCandidatura(idCandidatura);
         tentativo.setIdTest(test.getIdTest());
@@ -127,10 +119,9 @@ public class TentativoTestController {
 
         TentativoTest tentativoSalvato = tentativoTestRepository.save(tentativo);
 
-        // ✅ 7) CALCOLA PUNTEGGIO con punteggio FISSO = 1 per risposta corretta
         List<Domanda> domandeTest = domandaRepository.findByTest_IdTest(test.getIdTest());
         int punteggioTotale = 0;
-        final int PUNTI_PER_DOMANDA = 1; // ✅ Punteggio fisso
+        final int PUNTI_PER_DOMANDA = 1;
 
         for (CompletaTestRequest.RispostaInput input : request.getRisposte()) {
             Domanda domanda = domandaRepository.findById(input.getIdDomanda())
@@ -142,17 +133,15 @@ public class TentativoTestController {
 
             boolean corretta = opzione != null && Boolean.TRUE.equals(opzione.getIsCorretta());
             if (corretta) {
-                punteggioTotale += PUNTI_PER_DOMANDA; // ✅ Usa punteggio fisso
+                punteggioTotale += PUNTI_PER_DOMANDA;
             }
 
             Risposta risposta = new Risposta(PUNTI_PER_DOMANDA, tentativoSalvato, domanda, opzione);
             rispostaRepository.save(risposta);
         }
 
-        // ✅ 8) AGGIORNA PUNTEGGIO ED ESITO
         tentativoSalvato.setPunteggioTotale(punteggioTotale);
 
-        // ✅ Calcola esito in base al punteggio minimo del test
         String codiceEsito = punteggioTotale >= test.getPunteggioMin() ? "SUPERATO" : "NON_SUPERATO";
         EsitoTentativo esito = esitoTentativoRepository.findByCodice(codiceEsito)
                 .orElse(null);
@@ -160,11 +149,16 @@ public class TentativoTestController {
 
         tentativoTestRepository.save(tentativoSalvato);
 
-        // ✅ 9) RISPOSTA
+        int numeroDomande = domandeTest.size();
+        double percentuale = numeroDomande > 0
+                ? (tentativoSalvato.getPunteggioTotale() * 100.0) / numeroDomande
+                : 0.0;
+
         InviaRisposteResponse response = new InviaRisposteResponse(
                 tentativoSalvato.getIdTentativo(),
-                punteggioTotale,
-                codiceEsito
+                tentativoSalvato.getPunteggioTotale(),
+                codiceEsito,
+                percentuale
         );
 
         return ResponseEntity.ok(response);
@@ -218,12 +212,22 @@ public class TentativoTestController {
                         TentativoTest::getCompletatoAt,
                         Comparator.nullsLast(LocalDateTime::compareTo)
                 ).reversed())
-                .map(t -> new TentativoListItemDto(
-                        t.getIdTentativo(),
-                        t.getPunteggioTotale(),
-                        t.getCodiceEsito(),
-                        t.getCompletatoAt()
-                ))
+                .map(t -> {
+                    Test test = testRepository.findById(t.getIdTest()).orElse(null);
+                    int numeroDomande = (test != null) ? domandaRepository.countByTest_IdTest(test.getIdTest()) : 0;
+
+                    double percentuale = numeroDomande > 0
+                            ? (t.getPunteggioTotale() * 100.0) / numeroDomande
+                            : 0.0;
+
+                    return new TentativoListItemDto(
+                            t.getIdTentativo(),
+                            t.getPunteggioTotale(),
+                            t.getCodiceEsito(),
+                            t.getCompletatoAt(),
+                            percentuale
+                    );
+                })
                 .toList();
 
         return ResponseEntity.ok(result);
@@ -396,12 +400,23 @@ public class TentativoTestController {
 
         t.setPunteggioTotale(totale);
         t.setCompletatoAt(LocalDateTime.now());
-        t.setCodiceEsito(null); // popolalo se hai una tabella esito
+        Test test = testRepository.findById(idTest)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Test non trovato"));
+
+        String codiceEsito = totale >= test.getPunteggioMin() ? "SUPERATO" : "NON_SUPERATO";
+        EsitoTentativo esito = esitoTentativoRepository.findByCodice(codiceEsito)
+                .orElse(null);
+        t.setIdEsitoTentativo(esito);
 
         tentativoTestRepository.save(t);
 
+        int numeroDomande = domandaRepository.countByTest_IdTest(idTest);
+        double percentuale = numeroDomande > 0
+                ? (totale * 100.0) / numeroDomande
+                : 0.0;
+
         return ResponseEntity.ok(
-                new InviaRisposteResponse(idTentativo, totale, totale >= testRepository.findById(idTest).get().getPunteggioMin() ? "SUPERATO" : "NON_SUPERATO")
+                new InviaRisposteResponse(idTentativo, totale, totale >= testRepository.findById(idTest).get().getPunteggioMin() ? "SUPERATO" : "NON_SUPERATO", percentuale)
         );
     }
 
@@ -430,6 +445,10 @@ public class TentativoTestController {
         long errate = risposte.size() - corrette;
         long nonRisposte = numeroDomande - risposte.size();
 
+        double percentuale = numeroDomande > 0
+                ? (t.getPunteggioTotale() * 100.0) / numeroDomande
+                : 0.0;
+
         return ResponseEntity.ok(
                 new RisultatoTentativoDettaglioDto(
                         idTentativo,
@@ -438,7 +457,7 @@ public class TentativoTestController {
                         t.getPunteggioTotale(),
                         test.getPunteggioMin(),
                         t.getCodiceEsito(),
-                        t.getCompletatoAt() != null ? t.getCompletatoAt().toLocalDate() : null,
+                        t.getCompletatoAt(),
                         null,
                         numeroDomande,
                         (int) corrette,
