@@ -1,6 +1,7 @@
 package com.example.ProjectWork.dto.test;
 
 public class TentativoListItemDto {
+
     private Long idTentativo;
     private Long idTest;
     private String titoloTest;
@@ -27,9 +28,7 @@ public class TentativoListItemDto {
         this.completatoAt = completatoAt;
     }
 
-    public TentativoListItemDto(Long idTentativo, Integer punteggioTotale, String titoloTest, Integer durataMinuti) {
-
-    }
+    // RIMOSSO IL COSTRUTTORE SBAGLIATO CHE NON FACEVA NULLA
 
     public Long getIdTentativo() {
         return idTentativo;

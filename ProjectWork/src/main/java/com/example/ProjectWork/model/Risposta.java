@@ -5,7 +5,11 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 
 @Entity
-@Table(name = "RISPOSTA", schema = "dbo")
+@Table(name = "RISPOSTA", schema = "dbo",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"idTentativo", "idDomanda"})
+        }
+)
 public class Risposta {
 
     @Id
@@ -13,40 +17,47 @@ public class Risposta {
     private Long idRisposta;
 
     @Column
-    @Max(value = 10, message = "Valore massimo per singola risposta 10")
-    @Min(value = 1, message = "Valore minimo per singola risposta 1")
+    @Max(value = 10, message = "Valore massimo per singola risposta: 10")
+    @Min(value = 0, message = "Valore minimo per singola risposta: 0")
     private Integer punteggioAssegnato;
 
-    @ManyToOne
-    @JoinColumn(name = "idTentativo")
+    // Tentativo associato
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idTentativo", nullable = false)
     private TentativoTest idTentativo;
 
-    @ManyToOne
-    @JoinColumn(name = "idDomanda")
+    // Domanda associata
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idDomanda", nullable = false)
     private Domanda idDomanda;
 
-    @ManyToOne
+    // Opzione scelta (può essere null se non risponde)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "scelta")
-    private Opzione idOpzione; // scelta
+    private Opzione idOpzione;
 
-    // ===================== COSTRUTTORI =====================
+    // =====================================================
+    //                   COSTRUTTORI
+    // =====================================================
 
-    public Risposta(int punti, Long idTentativo, Long idDomanda, Long idOpzione) {
+    // Costruttore vuoto JPA
+    public Risposta() {
     }
 
-    public Risposta(
-            Integer punteggioAssegnato,
-            TentativoTest idTentativo,
-            Domanda idDomanda,
-            Opzione idOpzione
-    ) {
+    // Costruttore completo
+    public Risposta(Integer punteggioAssegnato,
+                    TentativoTest tentativo,
+                    Domanda domanda,
+                    Opzione opzione) {
         this.punteggioAssegnato = punteggioAssegnato;
-        this.idTentativo = idTentativo;
-        this.idDomanda = idDomanda;
-        this.idOpzione = idOpzione;
+        this.idTentativo = tentativo;
+        this.idDomanda = domanda;
+        this.idOpzione = opzione;
     }
 
-    // ===================== GETTER / SETTER =====================
+    // =====================================================
+    //                   GETTER / SETTER
+    // =====================================================
 
     public Long getIdRisposta() {
         return idRisposta;
