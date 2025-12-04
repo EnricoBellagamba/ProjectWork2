@@ -8,10 +8,12 @@ import com.example.ProjectWork.repository.PosizioneRepository;
 import com.example.ProjectWork.repository.SettoreRepository;
 import com.example.ProjectWork.repository.UtenteRepository;
 import com.example.ProjectWork.service.PosizioneService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -93,6 +95,7 @@ public class PosizioneController {
                 .orElseThrow(() -> new RuntimeException("Utente HR non trovato con email: " + email));
         posizione.setCreatedByHR(hr);
 
+
         // candidatureRicevute NOT NULL
         if (posizione.getCandidatureRicevute() == null) {
             posizione.setCandidatureRicevute(0L);
@@ -108,6 +111,13 @@ public class PosizioneController {
             StatoPosizione statoAperta = new StatoPosizione();
             statoAperta.setIdStatoPosizione(1L);
             posizione.setIdStatoPosizione(statoAperta);
+        }
+
+        if (posizione.getDescrizione() == null || posizione.getDescrizione().trim().isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Il campo descrizione è obbligatorio."
+            );
         }
 
         // *** SETTORE OBBLIGATORIO ***
