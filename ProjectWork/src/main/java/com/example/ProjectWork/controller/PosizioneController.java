@@ -1,5 +1,7 @@
 package com.example.ProjectWork.controller;
 
+import com.example.ProjectWork.dto.candidatura.CandidatoPerPosizioneDTO;
+import com.example.ProjectWork.dto.candidatura.Top5Request;
 import com.example.ProjectWork.model.Posizione;
 import com.example.ProjectWork.model.Settore;
 import com.example.ProjectWork.model.StatoPosizione;
@@ -37,14 +39,9 @@ public class PosizioneController {
         this.posizioneService = posizioneService;
     }
 
-    // =========================================================
-    //            ENDPOINT GENERICI POSIZIONI
-    // =========================================================
-
     @GetMapping
     public ResponseEntity<List<Posizione>> getAllPosizioni() {
-        List<Posizione> posizioni = posizioneRepository.findAll();
-        return ResponseEntity.ok(posizioni);
+        return ResponseEntity.ok(posizioneRepository.findAll());
     }
 
     @GetMapping("/{id}")
@@ -54,30 +51,20 @@ public class PosizioneController {
         return ResponseEntity.ok(posizione);
     }
 
-    // =========================================================
-    //           POSIZIONI CREATE DALL’HR LOGGATO
-    // =========================================================
-
     @GetMapping("/hr/mie")
     @PreAuthorize("hasRole('HR')")
     public ResponseEntity<List<Posizione>> getPosizioniCreateDaMe(Authentication authentication) {
-        if (authentication == null) {
+
+        if (authentication == null)
             throw new RuntimeException("Utente non autenticato.");
-        }
 
         String email = authentication.getName();
 
         Utente hr = utenteRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Utente HR non trovato con email: " + email));
 
-        List<Posizione> miePosizioni = posizioneRepository.findByCreatedByHR(hr);
-
-        return ResponseEntity.ok(miePosizioni);
+        return ResponseEntity.ok(posizioneRepository.findByCreatedByHR(hr));
     }
-
-    // =========================================================
-    //              CREAZIONE NUOVA POSIZIONE HR
-    // =========================================================
 
     @PostMapping
     @PreAuthorize("hasRole('HR')")
@@ -85,32 +72,27 @@ public class PosizioneController {
             @RequestBody Posizione posizione,
             Authentication authentication
     ) {
-        if (authentication == null) {
+        if (authentication == null)
             throw new RuntimeException("Utente HR non autenticato.");
-        }
 
-        // HR creatore
         String email = authentication.getName();
+
         Utente hr = utenteRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Utente HR non trovato con email: " + email));
+
         posizione.setCreatedByHR(hr);
 
 
-        // candidatureRicevute NOT NULL
-        if (posizione.getCandidatureRicevute() == null) {
+        if (posizione.getCandidatureRicevute() == null)
             posizione.setCandidatureRicevute(0L);
-        }
 
-        // pubblicataAt default oggi
-        if (posizione.getPubblicataAt() == null) {
+        if (posizione.getPubblicataAt() == null)
             posizione.setPubblicataAt(LocalDate.now());
-        }
 
-        // stato posizione default "aperta" (id=1) se non arriva niente
         if (posizione.getIdStatoPosizione() == null) {
-            StatoPosizione statoAperta = new StatoPosizione();
-            statoAperta.setIdStatoPosizione(1L);
-            posizione.setIdStatoPosizione(statoAperta);
+            StatoPosizione aperta = new StatoPosizione();
+            aperta.setIdStatoPosizione(1L);
+            posizione.setIdStatoPosizione(aperta);
         }
 
         if (posizione.getDescrizione() == null || posizione.getDescrizione().trim().isEmpty()) {
@@ -120,27 +102,40 @@ public class PosizioneController {
             );
         }
 
-        // *** SETTORE OBBLIGATORIO ***
-        if (posizione.getIdSettore() == null ||
-                posizione.getIdSettore().getIdSettore() == null) {
+        if (posizione.getIdSettore() == null || posizione.getIdSettore().getIdSettore() == null)
             throw new RuntimeException("Il campo idSettore è obbligatorio.");
-        }
 
-        Long idSettoreRichiesto = posizione.getIdSettore().getIdSettore();
-
-        Settore settore = settoreRepository.findById(idSettoreRichiesto)
-                .orElseThrow(() ->
-                        new RuntimeException("Settore non trovato con id: " + idSettoreRichiesto));
+        Settore settore = settoreRepository.findById(posizione.getIdSettore().getIdSettore())
+                .orElseThrow(() -> new RuntimeException("Settore non trovato."));
 
         posizione.setIdSettore(settore);
 
-        Posizione salvata = posizioneRepository.save(posizione);
-        return ResponseEntity.ok(salvata);
+        return ResponseEntity.ok(posizioneRepository.save(posizione));
     }
 
-    // =========================================================
-    //                     ELIMINAZIONE
-    // =========================================================
+    // ===========================================================================================
+    // CANDIDATI PER POSIZIONE
+    // ===========================================================================================
+    @GetMapping("/{idPosizione}/candidati")
+    @PreAuthorize("hasRole('HR')")
+    public ResponseEntity<List<CandidatoPerPosizioneDTO>> getCandidatiPerPosizione(
+            @PathVariable Long idPosizione) {
+
+        return ResponseEntity.ok(posizioneService.getCandidatiPerPosizione(idPosizione));
+    }
+
+    // ===========================================================================================
+    // SALVATAGGIO TOP 5
+    // ===========================================================================================
+    @PostMapping("/{idPosizione}/top5")
+    @PreAuthorize("hasRole('HR')")
+    public ResponseEntity<Void> salvaTop5(
+            @PathVariable Long idPosizione,
+            @RequestBody Top5Request req
+    ) {
+        posizioneService.salvaTop5(idPosizione, req);
+        return ResponseEntity.ok().build();
+    }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('HR')")

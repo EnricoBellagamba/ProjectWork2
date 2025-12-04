@@ -7,7 +7,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface CandidaturaRepository extends JpaRepository<Candidatura, Long> {
-    boolean existsByCandidato_IdCandidatoAndPosizione_IdPosizione(Long idCandidato, Long idPosizione);
 
-    List<Candidatura> findByCandidato_IdUtente(Utente idUtente);
+    // Tutte le candidature per posizione
+    List<Candidatura> findByPosizione_IdPosizione(Long idPosizione);
+
+    // Tutte le candidature di un utente (via candidato → idUtente)
+    List<Candidatura> findByCandidato_IdUtente(Utente utente);
+
+    // Verifica esistenza candidatura candidato + posizione
+    boolean existsByCandidato_IdCandidatoAndPosizione_IdPosizione(Long idCandidato, Long idPosizione);
 }

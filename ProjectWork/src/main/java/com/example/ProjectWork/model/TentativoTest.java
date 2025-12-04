@@ -1,9 +1,7 @@
-// src/main/java/com/example/ProjectWork/model/TentativoTest.java
 package com.example.ProjectWork.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Table(name = "TENTATIVO_TEST", schema = "dbo")
@@ -15,6 +13,11 @@ public class TentativoTest {
 
     @Column(name = "idCandidatura")
     private Long idCandidatura;
+
+    // AGGIUNTA DELLA RELAZIONE CORRETTA
+    @ManyToOne
+    @JoinColumn(name = "idCandidatura", insertable = false, updatable = false)
+    private Candidatura candidatura;
 
     @Column(name = "idTest")
     private Long idTest;
@@ -32,10 +35,7 @@ public class TentativoTest {
     @JoinColumn(name = "idEsitoTentativo")
     private EsitoTentativo idEsitoTentativo;
 
-    // ===================== COSTRUTTORI =====================
-
-    public TentativoTest() {
-    }
+    public TentativoTest() {}
 
     public TentativoTest(
             Long idCandidatura,
@@ -53,69 +53,33 @@ public class TentativoTest {
         this.punteggioTotale = punteggioTotale;
     }
 
-    // ===================== GETTER / SETTER =====================
+    public Long getIdTentativo() { return idTentativo; }
+    public void setIdTentativo(Long idTentativo) { this.idTentativo = idTentativo; }
 
-    public Long getIdTentativo() {
-        return idTentativo;
-    }
+    public Long getIdCandidatura() { return idCandidatura; }
+    public void setIdCandidatura(Long idCandidatura) { this.idCandidatura = idCandidatura; }
 
-    public void setIdTentativo(Long idTentativo) {
-        this.idTentativo = idTentativo;
-    }
+    public Candidatura getCandidatura() { return candidatura; }
+    public void setCandidatura(Candidatura candidatura) { this.candidatura = candidatura; }
 
-    public Long getIdCandidatura() {
-        return idCandidatura;
-    }
+    public Long getIdTest() { return idTest; }
+    public void setIdTest(Long idTest) { this.idTest = idTest; }
 
-    public void setIdCandidatura(Long idCandidatura) {
-        this.idCandidatura = idCandidatura;
-    }
+    public EsitoTentativo getIdEsitoTentativo() { return idEsitoTentativo; }
+    public void setIdEsitoTentativo(EsitoTentativo idEsitoTentativo) { this.idEsitoTentativo = idEsitoTentativo; }
 
-    public Long getIdTest() {
-        return idTest;
-    }
+    public LocalDateTime getIniziatoAt() { return iniziatoAt; }
+    public void setIniziatoAt(LocalDateTime iniziatoAt) { this.iniziatoAt = iniziatoAt; }
 
-    public void setIdTest(Long idTest) {
-        this.idTest = idTest;
-    }
+    public LocalDateTime getCompletatoAt() { return completatoAt; }
+    public void setCompletatoAt(LocalDateTime completatoAt) { this.completatoAt = completatoAt; }
 
-    public EsitoTentativo getIdEsitoTentativo() {
-        return idEsitoTentativo;
-    }
-
-    public void setIdEsitoTentativo(EsitoTentativo idEsitoTentativo) {
-        this.idEsitoTentativo = idEsitoTentativo;
-    }
-
-    public LocalDateTime getIniziatoAt() {
-        return iniziatoAt;
-    }
-
-    public void setIniziatoAt(LocalDateTime iniziatoAt) {
-        this.iniziatoAt = iniziatoAt;
-    }
-
-    public LocalDateTime getCompletatoAt() {
-        return completatoAt;
-    }
-
-    public void setCompletatoAt(LocalDateTime completatoAt) {
-        this.completatoAt = completatoAt;
-    }
-
-    public Integer getPunteggioTotale() {
-        return punteggioTotale;
-    }
-
-    public void setPunteggioTotale(Integer punteggioTotale) {
-        this.punteggioTotale = punteggioTotale;
-    }
+    public Integer getPunteggioTotale() { return punteggioTotale; }
+    public void setPunteggioTotale(Integer punteggioTotale) { this.punteggioTotale = punteggioTotale; }
 
     public String getCodiceEsito() {
-
-        return "";
+        return idEsitoTentativo != null ? idEsitoTentativo.getCodice() : null;
     }
 
-    public void setCodiceEsito(Object o) {
-    }
+    public void setCodiceEsito(Object o) {}
 }

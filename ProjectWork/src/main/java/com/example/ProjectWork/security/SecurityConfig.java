@@ -39,11 +39,15 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/", "/error", "/favicon.ico").permitAll()
+
+                        // --- ACCESSO AI CV LIBERO ---
+                        .requestMatchers("/api/files/**").permitAll()
+
                         .requestMatchers("/api/hr/**").hasRole("HR")
                         .requestMatchers("/api/candidati/**").hasRole("CANDIDATO")
                         .requestMatchers("/api/posizioni/**").hasAnyRole("CANDIDATO", "HR")
                         .requestMatchers("/api/utenti/**").permitAll()
-                        // Rimuovi questa linea: .requestMatchers("/api/candidature/**").permitAll()
+
                         .anyRequest().authenticated()
                 )
 
@@ -52,7 +56,6 @@ public class SecurityConfig {
 
         return http.build();
     }
-
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
