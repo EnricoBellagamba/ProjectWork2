@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "CANDIDATURA" ,schema = "dbo")
+@Table(name = "CANDIDATURA", schema = "dbo")
 public class Candidatura {
 
     @Id
@@ -12,16 +12,23 @@ public class Candidatura {
     private Long idCandidatura;
 
     @ManyToOne
-    @JoinColumn(name = "idCandidato")
+    @JoinColumn(name = "idCandidato", nullable = false)
     private Candidato candidato;
 
     @ManyToOne
-    @JoinColumn(name = "idPosizione")
+    @JoinColumn(name = "idPosizione", nullable = false)
     private Posizione posizione;
 
     @ManyToOne
-    @JoinColumn(name = "idStatoCandidatura")
+    @JoinColumn(name = "idStatoCandidatura", nullable = false)
     private StatoCandidatura stato;
+
+    @Column(nullable = false)
+    private LocalDate createdAt;
+
+    // ======================================
+    // GETTERS & SETTERS
+    // ======================================
 
     public Long getIdCandidatura() {
         return idCandidatura;
@@ -55,14 +62,11 @@ public class Candidatura {
         this.stato = stato;
     }
 
-    public LocalDate getCreatedAT() {
-        return createdAT;
+    public LocalDate getCreatedAt() {
+        return createdAt;
     }
 
-    public void setCreatedAT(LocalDate createdAT) {
-        this.createdAT = createdAT;
+    public void setCreatedAt(LocalDate createdAt) {
+        this.createdAt = createdAt;
     }
-
-    @Column(nullable = false)
-    private LocalDate createdAT;
 }

@@ -2,6 +2,7 @@ package com.example.ProjectWork.service;
 
 import com.example.ProjectWork.dto.candidatura.CandidaturaMiaDto;
 import com.example.ProjectWork.model.Candidatura;
+import com.example.ProjectWork.model.StatoCandidatura;
 import com.example.ProjectWork.model.Utente;
 
 import java.util.List;
@@ -13,7 +14,7 @@ public interface CandidaturaService {
     Candidatura createCandidatura(Long idCandidato, Long idPosizione);
 
     /**
-     * Restituisce le candidature dell'utente come entità (per usi interni / HR).
+     * Restituisce le candidature dell'utente come entità (uso interno / HR).
      */
     List<Candidatura> getCandidatureByUtente(Utente utente);
 
@@ -22,8 +23,13 @@ public interface CandidaturaService {
     Candidatura getCandidaturaById(Long id);
 
     /**
-     * Restituisce le candidature dell'utente loggato in forma di DTO,
-     * comprensive del punteggio test (ultimo tentativo completato).
+     * Restituisce le candidature dell'utente loggato in forma DTO,
+     * con punteggio e stato più leggibile.
      */
     List<CandidaturaMiaDto> getCandidatureDettaglioByUtente(Utente utente);
+
+    /**
+     * HR — Aggiorna lo stato della candidatura (ACCETTATA / RESPINTA).
+     */
+    Candidatura aggiornaStato(Long idCandidatura, StatoCandidatura nuovoStato);
 }
