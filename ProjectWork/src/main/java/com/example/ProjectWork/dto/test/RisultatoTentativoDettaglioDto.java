@@ -51,6 +51,9 @@ public class RisultatoTentativoDettaglioDto {
         this.numeroNonRisposte = numeroNonRisposte;
     }
 
+    public RisultatoTentativoDettaglioDto(Long idTentativo, Long idTest, String titolo, Integer punteggioTotale, Integer punteggioMin, String codiceEsito, LocalDateTime completatoAt, Object o, int numeroDomande, int corrette, int errate, int nonRisposte) {
+    }
+
     public Double getPercentuale() {
         return percentuale;
     }

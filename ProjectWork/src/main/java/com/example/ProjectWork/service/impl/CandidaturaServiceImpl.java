@@ -22,19 +22,21 @@ public class CandidaturaServiceImpl implements CandidaturaService {
     private final PosizioneRepository posizioneRepository;
     private final StatoCandidaturaRepository statoCandidaturaRepository;
     private final TentativoTestRepository tentativoTestRepository;
+    private final TestRepository testRepository;
 
     public CandidaturaServiceImpl(
             CandidaturaRepository candidaturaRepository,
             CandidatoRepository candidatoRepository,
             PosizioneRepository posizioneRepository,
             StatoCandidaturaRepository statoCandidaturaRepository,
-            TentativoTestRepository tentativoTestRepository
+            TentativoTestRepository tentativoTestRepository, TestRepository testRepository
     ) {
         this.candidaturaRepository = candidaturaRepository;
         this.candidatoRepository = candidatoRepository;
         this.posizioneRepository = posizioneRepository;
         this.statoCandidaturaRepository = statoCandidaturaRepository;
         this.tentativoTestRepository = tentativoTestRepository;
+        this.testRepository = testRepository;
     }
 
     @Override
@@ -110,6 +112,7 @@ public class CandidaturaServiceImpl implements CandidaturaService {
         return candidature.stream()
                 .map(c -> {
 
+                    // 1. Recupero tentativi → punteggio
                     List<TentativoTest> tentativi =
                             tentativoTestRepository.findAllByIdCandidatura(c.getIdCandidatura());
 
@@ -119,6 +122,18 @@ public class CandidaturaServiceImpl implements CandidaturaService {
                             .map(TentativoTest::getPunteggioTotale)
                             .orElse(null);
 
+                    // 2. ID TEST → recupero Test
+                    Long idTest = c.getPosizione().getIdTest();
+                    Integer numeroDomande = null;
+
+                    if (idTest != null) {
+                        Test test = testRepository.findById(idTest).orElse(null);
+                        if (test != null) {
+                            numeroDomande = test.getNumeroDomande(); // <— qui
+                        }
+                    }
+
+                    // 3. DTO posizione
                     Posizione p = c.getPosizione();
                     CandidaturaMiaDto.PosizioneDto posDto =
                             new CandidaturaMiaDto.PosizioneDto(
@@ -128,19 +143,23 @@ public class CandidaturaServiceImpl implements CandidaturaService {
                                     p.getContratto()
                             );
 
+                    // DTO stato
                     StatoCandidatura stato = c.getStato();
                     CandidaturaMiaDto.StatoDto st =
                             new CandidaturaMiaDto.StatoDto(stato.getCodice(), stato.getDescrizione());
 
+                    // 4. Create DTO con numeroDomande incluso
                     return new CandidaturaMiaDto(
                             c.getIdCandidatura(),
                             posDto,
                             c.getCreatedAt() != null ? c.getCreatedAt().toString() : null,
                             st,
-                            punteggio
+                            punteggio,
+                            numeroDomande    // <— qui passa il valore
                     );
                 })
                 .collect(Collectors.toList());
+
     }
 
     @Override

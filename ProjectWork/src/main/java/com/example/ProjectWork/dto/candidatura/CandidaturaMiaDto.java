@@ -7,6 +7,7 @@ public class CandidaturaMiaDto {
     private String createdAT;
     private StatoDto stato;
     private Integer punteggioTest;
+    private Integer numeroDomande;
 
     public CandidaturaMiaDto() {
     }
@@ -15,12 +16,23 @@ public class CandidaturaMiaDto {
                              PosizioneDto posizione,
                              String createdAT,
                              StatoDto stato,
-                             Integer punteggioTest) {
+                             Integer punteggioTest,
+                             Integer numeroDomande) {
         this.idCandidatura = idCandidatura;
         this.posizione = posizione;
         this.createdAT = createdAT;
         this.stato = stato;
         this.punteggioTest = punteggioTest;
+        this.numeroDomande = numeroDomande;
+
+    }
+
+    public Integer getNumeroDomande() {
+        return numeroDomande;
+    }
+
+    public void setNumeroDomande(Integer numeroDomande) {
+        this.numeroDomande = numeroDomande;
     }
 
     public Long getIdCandidatura() {
