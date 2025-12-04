@@ -431,6 +431,7 @@ public class TentativoTestController {
         TentativoTest t = tentativoTestRepository.findById(idTentativo)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tentativo non trovato"));
 
+
         Test test = testRepository.findById(t.getIdTest())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Test non trovato"));
 
@@ -451,9 +452,10 @@ public class TentativoTestController {
 
         return ResponseEntity.ok(
                 new RisultatoTentativoDettaglioDto(
-                        idTentativo,
+                        t.getIdTentativo(),
                         test.getIdTest(),
                         test.getTitolo(),
+                        percentuale,
                         t.getPunteggioTotale(),
                         test.getPunteggioMin(),
                         t.getCodiceEsito(),

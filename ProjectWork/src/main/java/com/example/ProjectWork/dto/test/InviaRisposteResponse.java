@@ -6,9 +6,8 @@ public class InviaRisposteResponse {
     private String esito;
     private Double percentuale;
 
-    public InviaRisposteResponse(Long idTentativo, int punteggioTotale, String codiceEsito, Double percentuale) {}
 
-    public InviaRisposteResponse(Long idTentativo, Integer punteggioTotale, Integer punteggioMax, String esito, Double percentuale) {
+    public InviaRisposteResponse(Long idTentativo, Integer punteggioTotale, String esito, Double percentuale) {
         this.idTentativo = idTentativo;
         this.punteggioTotale = punteggioTotale;
         this.esito = esito;

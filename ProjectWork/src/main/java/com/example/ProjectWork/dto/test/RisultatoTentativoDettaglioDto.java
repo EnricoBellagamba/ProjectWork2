@@ -25,6 +25,7 @@ public class RisultatoTentativoDettaglioDto {
             Long idTentativo,
             Long idTest,
             String titoloTest,
+            Double percentuale,
             Integer punteggioTotale,
             Integer punteggioMin,
             String esito,
@@ -38,6 +39,7 @@ public class RisultatoTentativoDettaglioDto {
         this.idTentativo = idTentativo;
         this.idTest = idTest;
         this.titoloTest = titoloTest;
+        this.percentuale=percentuale;
         this.punteggioTotale = punteggioTotale;
         this.punteggioMin = punteggioMin;
         this.esito = esito;
@@ -47,6 +49,10 @@ public class RisultatoTentativoDettaglioDto {
         this.numeroCorrette = numeroCorrette;
         this.numeroErrate = numeroErrate;
         this.numeroNonRisposte = numeroNonRisposte;
+    }
+
+    public Double getPercentuale() {
+        return percentuale;
     }
 
     public Long getIdTentativo() {
