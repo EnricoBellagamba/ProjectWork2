@@ -115,6 +115,10 @@ public class PosizioneServiceImpl implements PosizioneService {
             dto.setEmail(u.getEmail());
             dto.setCvUrl(u.getCvUrl());
 
+            // Stato candidatura — ADESSO FUNZIONA
+            dto.setStato(c.getStato().getCodice());
+
+            // Punteggio ultimo test COMPLETATO
             List<TentativoTest> tentativi =
                     tentativoTestRepository.findAllByIdCandidatura(c.getIdCandidatura());
 
@@ -125,9 +129,11 @@ public class PosizioneServiceImpl implements PosizioneService {
 
             if (tent != null) {
                 dto.setPunteggioTotale(tent.getPunteggioTotale());
-                if (tent.getIdEsitoTentativo() != null) {
-                    dto.setEsitoTentativo(tent.getIdEsitoTentativo().getCodice());
-                }
+                dto.setEsitoTentativo(
+                        tent.getIdEsitoTentativo() != null
+                                ? tent.getIdEsitoTentativo().getCodice()
+                                : null
+                );
             } else {
                 dto.setPunteggioTotale(0);
                 dto.setEsitoTentativo(null);
@@ -138,6 +144,7 @@ public class PosizioneServiceImpl implements PosizioneService {
 
         return out;
     }
+
 
     @Override
     public void salvaTop5(Long idPosizione, Top5Request req) {

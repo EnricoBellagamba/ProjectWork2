@@ -11,7 +11,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,20 +41,30 @@ public class CandidaturaServiceImpl implements CandidaturaService {
         this.testRepository = testRepository;
     }
 
+    // ================================================================
+    //   GET ALL
+    // ================================================================
     @Override
     public List<Candidatura> getAllCandidature() {
         return candidaturaRepository.findAll();
     }
 
+    // ================================================================
+    //   GET BY ID
+    // ================================================================
     @Override
     public Candidatura getCandidaturaById(Long id) {
         return candidaturaRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
+    // ================================================================
+    //   CREATE CANDIDATURA + CREAZIONE TENTATIVO SE ESISTE TEST
+    // ================================================================
     @Override
     public Candidatura createCandidatura(Long idCandidato, Long idPosizione) {
 
+        // Evita candidature duplicate
         boolean exists = candidaturaRepository
                 .existsByCandidato_IdCandidatoAndPosizione_IdPosizione(idCandidato, idPosizione);
 
@@ -60,6 +72,7 @@ public class CandidaturaServiceImpl implements CandidaturaService {
             throw new IllegalStateException("Esiste già una candidatura per questa posizione");
         }
 
+        // Recupero entità
         Candidato candidato = candidatoRepository.findById(idCandidato)
                 .orElseThrow(() -> new IllegalArgumentException("Candidato non trovato"));
 
@@ -67,8 +80,9 @@ public class CandidaturaServiceImpl implements CandidaturaService {
                 .orElseThrow(() -> new IllegalArgumentException("Posizione non trovata"));
 
         StatoCandidatura statoIniziale = statoCandidaturaRepository.findByCodice("IN_VALUTAZIONE")
-                .orElseThrow(() -> new IllegalStateException("Stato IN_VALUTAZIONE non trovato"));
+                .orElseThrow(() -> new IllegalStateException("Stato 'IN_VALUTAZIONE' non trovato"));
 
+        // Creo la candidatura
         Candidatura candidatura = new Candidatura();
         candidatura.setCandidato(candidato);
         candidatura.setPosizione(posizione);
@@ -77,18 +91,24 @@ public class CandidaturaServiceImpl implements CandidaturaService {
 
         candidatura = candidaturaRepository.save(candidatura);
 
+        // Creo tentativo solo se la posizione ha un test associato
         if (posizione.getIdTest() != null) {
+
             TentativoTest t = new TentativoTest();
             t.setIdCandidatura(candidatura.getIdCandidatura());
             t.setIdTest(posizione.getIdTest());
             t.setPunteggioTotale(0);
             t.setIniziatoAt(LocalDateTime.now());
+
             tentativoTestRepository.save(t);
         }
 
         return candidatura;
     }
 
+    // ================================================================
+    //   DELETE
+    // ================================================================
     @Override
     public void deleteCandidatura(Long id) {
         if (!candidaturaRepository.existsById(id)) {
@@ -97,12 +117,18 @@ public class CandidaturaServiceImpl implements CandidaturaService {
         candidaturaRepository.deleteById(id);
     }
 
+    // ================================================================
+    //   GET BY UTENTE (corretto con path completo)
+    // ================================================================
     @Override
     public List<Candidatura> getCandidatureByUtente(Utente utente) {
         return candidaturaRepository.findByCandidato_IdUtente_IdUtente(utente.getIdUtente());
 
     }
 
+    // ================================================================
+    //   GET DETTAGLIO CANDIDATURE + ULTIMO TENTATIVO COMPLETATO
+    // ================================================================
     @Override
     public List<CandidaturaMiaDto> getCandidatureDettaglioByUtente(Utente utente) {
 
@@ -116,6 +142,7 @@ public class CandidaturaServiceImpl implements CandidaturaService {
                     List<TentativoTest> tentativi =
                             tentativoTestRepository.findAllByIdCandidatura(c.getIdCandidatura());
 
+                    // Estraggo ultimo tentativo completato
                     Integer punteggio = tentativi.stream()
                             .filter(t -> t.getCompletatoAt() != null)
                             .max(Comparator.comparing(TentativoTest::getCompletatoAt))
@@ -143,7 +170,7 @@ public class CandidaturaServiceImpl implements CandidaturaService {
                                     p.getContratto()
                             );
 
-                    // DTO stato
+                    // Mappa stato candidatura
                     StatoCandidatura stato = c.getStato();
                     CandidaturaMiaDto.StatoDto st =
                             new CandidaturaMiaDto.StatoDto(stato.getCodice(), stato.getDescrizione());
@@ -162,6 +189,9 @@ public class CandidaturaServiceImpl implements CandidaturaService {
 
     }
 
+    // ================================================================
+    //   AGGIORNA STATO CANDIDATURA
+    // ================================================================
     @Override
     public Candidatura aggiornaStato(Long idCandidatura, StatoCandidatura nuovoStato) {
 
