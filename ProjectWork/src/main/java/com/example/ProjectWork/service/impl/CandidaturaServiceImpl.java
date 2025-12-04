@@ -98,6 +98,7 @@ public class CandidaturaServiceImpl implements CandidaturaService {
     @Override
     public List<Candidatura> getCandidatureByUtente(Utente utente) {
         return candidaturaRepository.findByCandidato_IdUtente_IdUtente(utente.getIdUtente());
+
     }
 
     @Override

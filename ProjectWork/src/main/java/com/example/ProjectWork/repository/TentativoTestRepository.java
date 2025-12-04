@@ -7,9 +7,7 @@ import java.util.List;
 
 public interface TentativoTestRepository extends JpaRepository<TentativoTest, Long> {
 
-    // lista completa dei tentativi per una candidatura
     List<TentativoTest> findAllByIdCandidatura(Long idCandidatura);
 
-    // singolo tentativo (se richiesto in altri punti)
-    TentativoTest findByIdCandidatura(Long idCandidatura);
+    List<TentativoTest> findAllByIdTest(Long idTest);
 }

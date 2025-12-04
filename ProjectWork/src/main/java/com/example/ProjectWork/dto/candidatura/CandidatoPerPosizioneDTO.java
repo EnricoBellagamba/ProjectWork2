@@ -14,8 +14,6 @@ public class CandidatoPerPosizioneDTO {
     private Integer punteggioTotale;
     private String esitoTentativo;
 
-    private String stato; // <<< AGGIUNTO
-
     public CandidatoPerPosizioneDTO() {}
 
     public Long getIdCandidatura() {
@@ -80,13 +78,5 @@ public class CandidatoPerPosizioneDTO {
 
     public void setEsitoTentativo(String esitoTentativo) {
         this.esitoTentativo = esitoTentativo;
-    }
-
-    public String getStato() {
-        return stato;
-    }
-
-    public void setStato(String stato) {
-        this.stato = stato;
     }
 }

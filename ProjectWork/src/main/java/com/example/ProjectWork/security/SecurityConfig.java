@@ -40,8 +40,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/", "/error", "/favicon.ico").permitAll()
 
-                        // --- ACCESSO AI CV LIBERO ---
+                        // RIPRISTINO: files pubblici
                         .requestMatchers("/api/files/**").permitAll()
+                        .requestMatchers("/api/cv/**").permitAll()
 
                         .requestMatchers("/api/hr/**").hasRole("HR")
                         .requestMatchers("/api/candidati/**").hasRole("CANDIDATO")
@@ -50,7 +51,6 @@ public class SecurityConfig {
 
                         .anyRequest().authenticated()
                 )
-
 
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 

@@ -14,8 +14,8 @@ public class CvUploadController {
 
     private final CandidatoRepository candidatoRepository;
 
-    private static final String BASE_PATH =
-            "C:\\Users\\ferric\\IdeaProjects\\ProjectWork2\\uploads\\cv\\";
+    // Path RELATIVA ripristinata
+    private static final String BASE_PATH = "uploads/cv/";
 
     public CvUploadController(CandidatoRepository candidatoRepository) {
         this.candidatoRepository = candidatoRepository;
@@ -31,12 +31,14 @@ public class CvUploadController {
                 .orElseThrow(() -> new RuntimeException("Candidato non trovato"));
 
         String filename = "cv_" + idCandidato + ".pdf";
+
         File dest = new File(BASE_PATH + filename);
 
-        dest.getParentFile().mkdirs(); // crea cartella se manca
+        dest.getParentFile().mkdirs();
         file.transferTo(dest);
 
-        candidato.getIdUtente().setCvUrl(dest.getAbsolutePath());
+        // Salvo solo path relativa
+        candidato.getIdUtente().setCvUrl(filename);
         candidatoRepository.save(candidato);
 
         return ResponseEntity.ok("CV caricato");

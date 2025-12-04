@@ -12,21 +12,18 @@ import java.io.File;
 @RequestMapping("/api/files")
 public class FileController {
 
-    // Cartella dove vengono salvati i CV
-    private final String basePath = "C:/Users/ferric/IdeaProjects/ProjectWork2/uploads/cv/";
+    // Path RELATIVA ripristinata
+    private final String basePath = "uploads/cv/";
 
     @GetMapping("/cv/{filename}")
     public ResponseEntity<FileSystemResource> getCv(@PathVariable String filename) {
 
-        // Rimuove eventuali slash iniziali che rompono il path
         filename = filename.replace("\\", "").replace("/", "");
 
         File file = new File(basePath + filename);
 
         if (!file.exists() || !file.isFile()) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(null);
+            return ResponseEntity.badRequest().body(null);
         }
 
         FileSystemResource resource = new FileSystemResource(file);
