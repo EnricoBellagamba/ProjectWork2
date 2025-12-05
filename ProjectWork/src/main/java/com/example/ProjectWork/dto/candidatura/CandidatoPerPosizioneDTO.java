@@ -14,7 +14,23 @@ public class CandidatoPerPosizioneDTO {
     private Integer punteggioTotale;
     private String esitoTentativo;
 
-    private String stato; // <<< AGGIUNTO
+    private String stato;
+    private Integer numeroDomande;
+
+
+    public CandidatoPerPosizioneDTO(Long idCandidatura, Long idCandidato, String nome, String cognome, String email, String cvUrl, Integer punteggioTotale, String esitoTentativo, String stato, Integer numeroDomande) {
+        this.idCandidatura = idCandidatura;
+        this.idCandidato = idCandidato;
+        this.nome = nome;
+        this.cognome = cognome;
+        this.email = email;
+        this.cvUrl = cvUrl;
+        this.punteggioTotale = punteggioTotale;
+        this.esitoTentativo = esitoTentativo;
+        this.stato = stato;
+        this.numeroDomande = numeroDomande;
+    }
+
 
     public CandidatoPerPosizioneDTO() {}
 
@@ -89,4 +105,13 @@ public class CandidatoPerPosizioneDTO {
     public void setStato(String stato) {
         this.stato = stato;
     }
+
+    public Integer getNumeroDomande() {
+        return numeroDomande;
+    }
+
+    public void setNumeroDomande(Integer numeroDomande) {
+        this.numeroDomande = numeroDomande;
+    }
+
 }
