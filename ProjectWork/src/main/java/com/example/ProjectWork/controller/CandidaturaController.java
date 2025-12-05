@@ -48,71 +48,92 @@ public class CandidaturaController {
         this.statoCandidaturaRepository = statoCandidaturaRepository;
     }
 
-    // ======================================================================================
-    // GET tutte le candidature (uso interno / HR)
-    // ======================================================================================
+    // =====================================================================
+    // GET tutte le candidature
+    // =====================================================================
     @GetMapping
     public ResponseEntity<List<Candidatura>> getAllCandidature() {
         return ResponseEntity.ok(candidaturaService.getAllCandidature());
     }
 
-    // ======================================================================================
+    // =====================================================================
     // GET candidatura singola
-    // ======================================================================================
+    // =====================================================================
     @GetMapping("/{id}")
     public ResponseEntity<Candidatura> getCandidaturaById(@PathVariable Long id) {
         return ResponseEntity.ok(candidaturaService.getCandidaturaById(id));
     }
 
-    // ======================================================================================
-    // POST — creazione "logica" candidatura (usata per abilitare il test)
-    // NON crea una candidatura vera nel DB: la crea solo alla consegna test
-    // ======================================================================================
+    // =====================================================================
+    // POST — CREA CANDIDATURA *SE NON ESISTE TEST*
+    // SE ESISTE TEST, NON CREA NIENTE E AVVIA SOLO IL TEST
+    // =====================================================================
     @PostMapping
     @PreAuthorize("hasRole('CANDIDATO')")
     public ResponseEntity<Map<String, String>> createCandidaturaRequest(
             @RequestBody NuovaCandidaturaRequest request,
             Authentication authentication
     ) {
-
+        // Utente loggato
         String email = authentication.getName();
         Utente utente = utenteRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utente non trovato"));
 
-        // Recupera posizione
+        // Posizione
         Posizione posizione = posizioneRepository.findById(request.getIdPosizione())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Posizione non trovata"));
 
-        // Recupero candidato
-        Candidato candidato = candidatoRepository.findByIdUtente(utente).orElse(null);
+        // Candidato associato all'utente
+        Candidato candidato = candidatoRepository.findByIdUtente(utente)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Candidato non trovato"));
 
-        if (candidato != null) {
-            boolean exists = candidaturaRepository
-                    .existsByCandidato_IdCandidatoAndPosizione_IdPosizione(
-                            candidato.getIdCandidato(),
-                            posizione.getIdPosizione()
-                    );
-
-            if (exists) {
-                throw new ResponseStatusException(
-                        HttpStatus.CONFLICT,
-                        "Hai già una candidatura per questa posizione"
+        // Evita candidature duplicate
+        boolean exists = candidaturaRepository
+                .existsByCandidato_IdCandidatoAndPosizione_IdPosizione(
+                        candidato.getIdCandidato(),
+                        posizione.getIdPosizione()
                 );
-            }
+
+        if (exists) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Hai già una candidatura per questa posizione"
+            );
         }
 
-        // Risposta per FE: non crea candidatura, ma permette di iniziare test
+        // ================================
+        // CASO 1 — NON ESISTE TEST → CREA SUBITO CANDIDATURA
+        // ================================
+        if (posizione.getIdTest() == null) {
+
+            Candidatura nuova = candidaturaService.createCandidatura(
+                    candidato.getIdCandidato(),
+                    posizione.getIdPosizione()
+            );
+
+            Map<String, String> resp = new HashMap<>();
+            resp.put("message", "Candidatura inviata con successo");
+            resp.put("idCandidatura", nuova.getIdCandidatura().toString());
+            resp.put("idPosizione", posizione.getIdPosizione().toString());
+            resp.put("idTest", null);
+
+            return ResponseEntity.ok(resp);
+        }
+
+        // ================================
+        // CASO 2 — ESISTE TEST → NON CREA NIENTE, PERMETTE DI INIZIARE IL TEST
+        // ================================
         Map<String, String> resp = new HashMap<>();
         resp.put("message", "Puoi procedere con il test");
         resp.put("idPosizione", posizione.getIdPosizione().toString());
-        resp.put("idTest", posizione.getIdTest() != null ? posizione.getIdTest().toString() : null);
+        resp.put("idTest", posizione.getIdTest().toString());
 
         return ResponseEntity.ok(resp);
     }
 
-    // ======================================================================================
+    // =====================================================================
     // GET candidature dell’utente loggato
-    // ======================================================================================
+    // =====================================================================
     @GetMapping("/mie")
     @PreAuthorize("hasRole('CANDIDATO')")
     public ResponseEntity<List<CandidaturaMiaDto>> getMieCandidature(Authentication authentication) {
@@ -120,36 +141,32 @@ public class CandidaturaController {
         Utente utente = utenteRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        return ResponseEntity.ok(
-                candidaturaService.getCandidatureDettaglioByUtente(utente)
-        );
+        return ResponseEntity.ok(candidaturaService.getCandidatureDettaglioByUtente(utente));
     }
 
-    // ======================================================================================
+    // =====================================================================
     // DELETE candidatura
-    // ======================================================================================
+    // =====================================================================
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCandidatura(@PathVariable Long id) {
         candidaturaService.deleteCandidatura(id);
         return ResponseEntity.noContent().build();
     }
 
-    // ======================================================================================
-    // HR — lista candidati per posizione (detta "schermata HR posizione")
-    // ======================================================================================
+    // =====================================================================
+    // HR — Candidati di una posizione
+    // =====================================================================
     @GetMapping("/posizione/{idPosizione}")
     @PreAuthorize("hasRole('HR')")
     public ResponseEntity<List<CandidatoPerPosizioneDTO>> getCandidatiPerPosizione(
             @PathVariable Long idPosizione
     ) {
-        return ResponseEntity.ok(
-                posizioneService.getCandidatiPerPosizione(idPosizione)
-        );
+        return ResponseEntity.ok(posizioneService.getCandidatiPerPosizione(idPosizione));
     }
 
-    // ======================================================================================
-    // HR — aggiorna stato candidatura (ACCETTATA / RESPINTA)
-    // ======================================================================================
+    // =====================================================================
+    // HR — modifica stato candidatura
+    // =====================================================================
     @PatchMapping("/{idCandidatura}/stato")
     @PreAuthorize("hasRole('HR')")
     public ResponseEntity<Map<String, String>> aggiornaStato(
@@ -163,7 +180,7 @@ public class CandidaturaController {
         }
 
         StatoCandidatura nuovo = statoCandidaturaRepository.findByCodice(stato)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Stato non trovato"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         Candidatura aggiornata = candidaturaService.aggiornaStato(idCandidatura, nuovo);
 
