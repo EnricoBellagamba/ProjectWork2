@@ -37,6 +37,10 @@ public class PosizioneServiceImpl implements PosizioneService {
         this.statoCandidaturaRepository = statoCandidaturaRepository;
     }
 
+    // ============================================================
+    // OPERAZIONI GENERICHE SU POSIZIONE
+    // ============================================================
+
     @Override
     public List<Posizione> getAllPosizioni() {
         return posizioneRepository.findAll();
@@ -45,10 +49,12 @@ public class PosizioneServiceImpl implements PosizioneService {
     @Override
     public Posizione createPosizione(Posizione posizione) {
 
+        // default candidature ricevute
         if (posizione.getCandidatureRicevute() == null) {
             posizione.setCandidatureRicevute(0L);
         }
 
+        // settore di default
         if (posizione.getIdSettore() == null) {
             posizione.setIdSettore(
                     settoreRepository.findById(1L)
@@ -56,6 +62,7 @@ public class PosizioneServiceImpl implements PosizioneService {
             );
         }
 
+        // stato posizione di default
         if (posizione.getIdStatoPosizione() == null) {
             StatoPosizione aperta = statoPosizioneRepository.findByCodice("APERTA")
                     .orElseThrow(() -> new RuntimeException("Stato posizione 'APERTA' non trovato"));
@@ -95,6 +102,10 @@ public class PosizioneServiceImpl implements PosizioneService {
         return posizioneRepository.save(posizione);
     }
 
+    // ============================================================
+    // CANDIDATI PER POSIZIONE
+    // ============================================================
+
     @Override
     public List<CandidatoPerPosizioneDTO> getCandidatiPerPosizione(Long idPosizione) {
 
@@ -106,32 +117,34 @@ public class PosizioneServiceImpl implements PosizioneService {
         for (Candidatura c : candidature) {
 
             CandidatoPerPosizioneDTO dto = new CandidatoPerPosizioneDTO();
+
             dto.setIdCandidatura(c.getIdCandidatura());
             dto.setIdCandidato(c.getCandidato().getIdCandidato());
 
+            // Dati utente
             Utente u = c.getCandidato().getIdUtente();
             dto.setNome(u.getNome());
             dto.setCognome(u.getCognome());
             dto.setEmail(u.getEmail());
             dto.setCvUrl(u.getCvUrl());
 
-            // Stato candidatura — ADESSO FUNZIONA
+            // Stato candidatura
             dto.setStato(c.getStato().getCodice());
 
-            // Punteggio ultimo test COMPLETATO
+            // Recupero ultimo tentativo test completato
             List<TentativoTest> tentativi =
                     tentativoTestRepository.findAllByIdCandidatura(c.getIdCandidatura());
 
-            TentativoTest tent = tentativi.stream()
+            TentativoTest ultimoTentativo = tentativi.stream()
                     .filter(t -> t.getCompletatoAt() != null)
                     .max(Comparator.comparing(TentativoTest::getCompletatoAt))
                     .orElse(null);
 
-            if (tent != null) {
-                dto.setPunteggioTotale(tent.getPunteggioTotale());
+            if (ultimoTentativo != null) {
+                dto.setPunteggioTotale(ultimoTentativo.getPunteggioTotale());
                 dto.setEsitoTentativo(
-                        tent.getIdEsitoTentativo() != null
-                                ? tent.getIdEsitoTentativo().getCodice()
+                        ultimoTentativo.getIdEsitoTentativo() != null
+                                ? ultimoTentativo.getIdEsitoTentativo().getCodice()
                                 : null
                 );
             } else {
@@ -145,6 +158,9 @@ public class PosizioneServiceImpl implements PosizioneService {
         return out;
     }
 
+    // ============================================================
+    // TOP 5 CANDIDATI — HR
+    // ============================================================
 
     @Override
     public void salvaTop5(Long idPosizione, Top5Request req) {
@@ -171,5 +187,29 @@ public class PosizioneServiceImpl implements PosizioneService {
             }
             candidaturaRepository.save(c);
         }
+    }
+
+    // ============================================================
+    // TOP CANDIDATI per POSIZIONE
+    // ============================================================
+
+    @Override
+    public List<CandidatoPerPosizioneDTO> getTopCandidati(Long idPosizione, int limit) {
+
+        // Recupera tutti i candidati (con punteggio aggiornato)
+        List<CandidatoPerPosizioneDTO> tutti = getCandidatiPerPosizione(idPosizione);
+
+        // Ordina DESC per punteggio
+        tutti.sort(Comparator.comparing(
+                CandidatoPerPosizioneDTO::getPunteggioTotale,
+                Comparator.nullsLast(Comparator.reverseOrder())
+        ));
+
+        // Limita
+        if (limit > 0 && tutti.size() > limit) {
+            return tutti.subList(0, limit);
+        }
+
+        return tutti;
     }
 }

@@ -24,4 +24,7 @@ public interface PosizioneService {
     List<CandidatoPerPosizioneDTO> getCandidatiPerPosizione(Long idPosizione);
 
     void salvaTop5(Long idPosizione, Top5Request req);
+
+    List<CandidatoPerPosizioneDTO> getTopCandidati(Long idPosizione, int limit);
 }
+

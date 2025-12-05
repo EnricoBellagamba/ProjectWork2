@@ -13,7 +13,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,7 +30,8 @@ public class CandidaturaServiceImpl implements CandidaturaService {
             CandidatoRepository candidatoRepository,
             PosizioneRepository posizioneRepository,
             StatoCandidaturaRepository statoCandidaturaRepository,
-            TentativoTestRepository tentativoTestRepository, TestRepository testRepository
+            TentativoTestRepository tentativoTestRepository,
+            TestRepository testRepository
     ) {
         this.candidaturaRepository = candidaturaRepository;
         this.candidatoRepository = candidatoRepository;
@@ -42,7 +42,7 @@ public class CandidaturaServiceImpl implements CandidaturaService {
     }
 
     // ================================================================
-    //   GET ALL
+    // GET ALL
     // ================================================================
     @Override
     public List<Candidatura> getAllCandidature() {
@@ -50,7 +50,7 @@ public class CandidaturaServiceImpl implements CandidaturaService {
     }
 
     // ================================================================
-    //   GET BY ID
+    // GET BY ID
     // ================================================================
     @Override
     public Candidatura getCandidaturaById(Long id) {
@@ -59,12 +59,11 @@ public class CandidaturaServiceImpl implements CandidaturaService {
     }
 
     // ================================================================
-    //   CREATE CANDIDATURA + CREAZIONE TENTATIVO SE ESISTE TEST
+    // CREA CANDIDATURA (solo quando richiesto dal sistema, non dal controller del test)
     // ================================================================
     @Override
     public Candidatura createCandidatura(Long idCandidato, Long idPosizione) {
 
-        // Evita candidature duplicate
         boolean exists = candidaturaRepository
                 .existsByCandidato_IdCandidatoAndPosizione_IdPosizione(idCandidato, idPosizione);
 
@@ -72,7 +71,6 @@ public class CandidaturaServiceImpl implements CandidaturaService {
             throw new IllegalStateException("Esiste già una candidatura per questa posizione");
         }
 
-        // Recupero entità
         Candidato candidato = candidatoRepository.findById(idCandidato)
                 .orElseThrow(() -> new IllegalArgumentException("Candidato non trovato"));
 
@@ -82,7 +80,6 @@ public class CandidaturaServiceImpl implements CandidaturaService {
         StatoCandidatura statoIniziale = statoCandidaturaRepository.findByCodice("IN_VALUTAZIONE")
                 .orElseThrow(() -> new IllegalStateException("Stato 'IN_VALUTAZIONE' non trovato"));
 
-        // Creo la candidatura
         Candidatura candidatura = new Candidatura();
         candidatura.setCandidato(candidato);
         candidatura.setPosizione(posizione);
@@ -91,7 +88,7 @@ public class CandidaturaServiceImpl implements CandidaturaService {
 
         candidatura = candidaturaRepository.save(candidatura);
 
-        // Creo tentativo solo se la posizione ha un test associato
+        // Se la posizione ha un test → crea il tentativo base
         if (posizione.getIdTest() != null) {
 
             TentativoTest t = new TentativoTest();
@@ -99,6 +96,7 @@ public class CandidaturaServiceImpl implements CandidaturaService {
             t.setIdTest(posizione.getIdTest());
             t.setPunteggioTotale(0);
             t.setIniziatoAt(LocalDateTime.now());
+            t.setCompletatoAt(null);
 
             tentativoTestRepository.save(t);
         }
@@ -107,7 +105,7 @@ public class CandidaturaServiceImpl implements CandidaturaService {
     }
 
     // ================================================================
-    //   DELETE
+    // DELETE
     // ================================================================
     @Override
     public void deleteCandidatura(Long id) {
@@ -118,16 +116,15 @@ public class CandidaturaServiceImpl implements CandidaturaService {
     }
 
     // ================================================================
-    //   GET BY UTENTE (corretto con path completo)
+    // GET CANDIDATURE (ruolo candidato)
     // ================================================================
     @Override
     public List<Candidatura> getCandidatureByUtente(Utente utente) {
         return candidaturaRepository.findByCandidato_IdUtente_IdUtente(utente.getIdUtente());
-
     }
 
     // ================================================================
-    //   GET DETTAGLIO CANDIDATURE + ULTIMO TENTATIVO COMPLETATO
+    // GET DETTAGLIO CANDIDATURE CANDIDATO
     // ================================================================
     @Override
     public List<CandidaturaMiaDto> getCandidatureDettaglioByUtente(Utente utente) {
@@ -138,29 +135,27 @@ public class CandidaturaServiceImpl implements CandidaturaService {
         return candidature.stream()
                 .map(c -> {
 
-                    // 1. Recupero tentativi → punteggio
-                    List<TentativoTest> tentativi =
-                            tentativoTestRepository.findAllByIdCandidatura(c.getIdCandidatura());
-
-                    // Estraggo ultimo tentativo completato
-                    Integer punteggio = tentativi.stream()
+                    // Ultimo tentativo completato
+                    Integer punteggio = tentativoTestRepository
+                            .findAllByIdCandidatura(c.getIdCandidatura())
+                            .stream()
                             .filter(t -> t.getCompletatoAt() != null)
                             .max(Comparator.comparing(TentativoTest::getCompletatoAt))
                             .map(TentativoTest::getPunteggioTotale)
                             .orElse(null);
 
-                    // 2. ID TEST → recupero Test
-                    Long idTest = c.getPosizione().getIdTest();
+                    // Numero domande del test collegato alla posizione
                     Integer numeroDomande = null;
+                    Long idTest = c.getPosizione().getIdTest();
 
                     if (idTest != null) {
                         Test test = testRepository.findById(idTest).orElse(null);
                         if (test != null) {
-                            numeroDomande = test.getNumeroDomande(); // <— qui
+                            numeroDomande = test.getNumeroDomande();
                         }
                     }
 
-                    // 3. DTO posizione
+                    // DTO posizione interna
                     Posizione p = c.getPosizione();
                     CandidaturaMiaDto.PosizioneDto posDto =
                             new CandidaturaMiaDto.PosizioneDto(
@@ -170,33 +165,30 @@ public class CandidaturaServiceImpl implements CandidaturaService {
                                     p.getContratto()
                             );
 
-                    // Mappa stato candidatura
                     StatoCandidatura stato = c.getStato();
                     CandidaturaMiaDto.StatoDto st =
                             new CandidaturaMiaDto.StatoDto(stato.getCodice(), stato.getDescrizione());
 
-                    // 4. Create DTO con numeroDomande incluso
                     return new CandidaturaMiaDto(
                             c.getIdCandidatura(),
                             posDto,
                             c.getCreatedAt() != null ? c.getCreatedAt().toString() : null,
                             st,
                             punteggio,
-                            numeroDomande    // <— qui passa il valore
+                            numeroDomande
                     );
                 })
                 .collect(Collectors.toList());
-
     }
 
     // ================================================================
-    //   AGGIORNA STATO CANDIDATURA
+    // HR — AGGIORNA STATO CANDIDATURA
     // ================================================================
     @Override
     public Candidatura aggiornaStato(Long idCandidatura, StatoCandidatura nuovoStato) {
 
         Candidatura c = candidaturaRepository.findById(idCandidatura)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Candidatura non trovata"));
 
         c.setStato(nuovoStato);
 
