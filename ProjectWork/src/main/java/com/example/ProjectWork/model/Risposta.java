@@ -13,8 +13,8 @@ public class Risposta {
     private Long idRisposta;
 
     @Column
-    @Max(value = 10, message = "Valore massimo per singola risposta 10")
-    @Min(value = 1, message = "Valore minimo per singola risposta 1")
+    @Max(value = 1, message = "Valore massimo per singola risposta 1")
+    @Min(value = 0, message = "Valore minimo per singola risposta 0")
     private Integer punteggioAssegnato;
 
     @ManyToOne
