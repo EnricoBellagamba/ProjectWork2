@@ -142,8 +142,9 @@ public class TentativoTestController {
 
         tentativoSalvato.setPunteggioTotale(punteggioTotale);
 
-        String codiceEsito =
-                punteggioTotale >= test.getPunteggioMin() ? "SUPERATO" : "NON_SUPERATO";
+        double percentualeEsito = (punteggioTotale * 100.0) / domandeTest.size();
+
+        String codiceEsito = percentualeEsito >= test.getPunteggioMin() ? "SUPERATO" : "NON_SUPERATO";
 
         EsitoTentativo esito = esitoTentativoRepository.findByCodice(codiceEsito)
                 .orElse(null);
