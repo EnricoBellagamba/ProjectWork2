@@ -132,8 +132,17 @@ public class TentativoTestController {
                     ? opzioneRepository.findById(input.getIdOpzione()).orElse(null)
                     : null;
 
-            boolean corretta = opzione != null && Boolean.TRUE.equals(opzione.getIsCorretta());
-            int punti = corretta ? 1 : 0;
+            int punti = 0;
+            // 1. Risposta Corretta
+            if (opzione != null && Boolean.TRUE.equals(opzione.getIsCorretta())) {
+                punti = 1;
+                // 2. Risposta Non Data
+            } else if (opzione == null) {
+                punti = 0; // O un altro valore se devi distinguere il punteggio
+                // 3. Risposta Errata (opzione != null ma isCorretta è false)
+            } else {
+                punti = 0;
+            }
 
             punteggioTotale += punti;
 
@@ -489,15 +498,31 @@ public class TentativoTestController {
         List<Risposta> risposte = rispostaRepository.findByIdTentativo_IdTentativo(idTentativo);
         int numeroDomande = domandaRepository.countByTest_IdTest(test.getIdTest());
 
+        // --- NUOVA LOGICA DI CONTEGGIO ---
+
+        // 1. Risposte Corrette (Punti > 0)
         long corrette = risposte.stream()
-                .filter(r -> r.getIdOpzione() != null &&
-                        Boolean.TRUE.equals(
-                                opzioneRepository.findById(r.getIdOpzione().getIdOpzione()).get().getIsCorretta()
-                        ))
+                // Assumiamo che Punti > 0 solo se la risposta è stata valutata come corretta (punti=1)
+                .filter(r -> r.getPunteggioAssegnato() > 0)
                 .count();
 
-        long errate = risposte.size() - corrette;
-        long nonRisposte = numeroDomande - risposte.size();
+        // 2. Risposte Non Date (Opzione selezionata è NULL)
+        long nonRisposte = risposte.stream()
+                .filter(r -> r.getIdOpzione() == null)
+                .count();
+
+        // 3. Risposte Errate (Opzione selezionata NON è NULL e Punti <= 0)
+        // Vogliamo contare tutte le risposte date (Opzione != null) che non sono corrette.
+        long risposteDate = risposte.stream()
+                .filter(r -> r.getIdOpzione() != null)
+                .count();
+
+        long errate = risposteDate - corrette;
+
+        // Verifica di integrità (opzionale):
+        // if (errate < 0) errate = 0; // Prevenzione errori logici
+
+        // --- FINE NUOVA LOGICA DI CONTEGGIO ---
 
         double percentuale =
                 numeroDomande > 0 ? (t.getPunteggioTotale() * 100.0) / numeroDomande : 0.0;
