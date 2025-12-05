@@ -2,6 +2,7 @@ package com.example.ProjectWork.service.impl;
 
 import com.example.ProjectWork.model.Test;
 import com.example.ProjectWork.model.TipoTest;
+import com.example.ProjectWork.repository.PosizioneRepository;
 import com.example.ProjectWork.repository.TestRepository;
 import com.example.ProjectWork.repository.TipoTestRepository;
 import com.example.ProjectWork.service.TestService;
@@ -16,11 +17,13 @@ public class TestServiceImpl implements TestService {
 
     private final TestRepository testRepository;
     private final TipoTestRepository tipoTestRepository;
+    private final PosizioneRepository posizioneRepository;
 
     public TestServiceImpl(TestRepository testRepository,
-                           TipoTestRepository tipoTestRepository) {
+                           TipoTestRepository tipoTestRepository, PosizioneRepository posizioneRepository) {
         this.testRepository = testRepository;
         this.tipoTestRepository = tipoTestRepository;
+        this.posizioneRepository = posizioneRepository;
     }
 
     /**
@@ -90,11 +93,23 @@ public class TestServiceImpl implements TestService {
      * Eliminazione test.
      */
     @Override
-    public void deleteTest(Long id) {
-        if (!testRepository.existsById(id)) {
-            throw new RuntimeException("Test con ID " + id + " non trovato");
+    public void deleteTest(Long idTest) {
+        Test test = testRepository.findById(idTest)
+                .orElseThrow(() ->
+                        new ResponseStatusException(HttpStatus.NOT_FOUND, "Test non trovato"));
+
+        // Verifica: è associato ad una posizione?
+        boolean associato = posizioneRepository.existsByIdTest(idTest);
+
+        if (associato) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Impossibile eliminare: il test è associato a una o più posizioni."
+            );
         }
-        testRepository.deleteById(id);
+
+        // Se non è associato ,elimina
+        testRepository.delete(test);
     }
 
     // =====================================================================

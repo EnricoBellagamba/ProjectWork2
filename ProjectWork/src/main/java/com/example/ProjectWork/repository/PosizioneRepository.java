@@ -14,4 +14,6 @@ public interface PosizioneRepository extends JpaRepository<Posizione, Long> {
      */
     List<Posizione> findByCreatedByHR(Utente createdByHR);
 
+    boolean existsByIdTest(Long idTest);
+
 }

@@ -44,10 +44,6 @@ public interface TestService {
      */
     Test updateTest(Long id, Test test);
 
-    /**
-     * Elimina il test con l'id specificato.
-     *
-     * @param id id del test da eliminare
-     */
-    void deleteTest(Long id);
+
+    void deleteTest(Long idTest);
 }
