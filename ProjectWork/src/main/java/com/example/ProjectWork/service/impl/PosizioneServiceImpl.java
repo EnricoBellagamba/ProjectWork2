@@ -37,9 +37,9 @@ public class PosizioneServiceImpl implements PosizioneService {
         this.statoCandidaturaRepository = statoCandidaturaRepository;
     }
 
-    // =====================================================================
+    // ============================================================
     // CRUD POSIZIONI
-    // =====================================================================
+    // ============================================================
 
     @Override
     public List<Posizione> getAllPosizioni() {
@@ -99,9 +99,9 @@ public class PosizioneServiceImpl implements PosizioneService {
         return posizioneRepository.save(posizione);
     }
 
-    // =====================================================================
-    // CANDIDATI PER POSIZIONE (ordinamento dinamico)
-    // =====================================================================
+    // ============================================================
+    // CANDIDATI PER POSIZIONE (ordinamento dinamico test / no test)
+    // ============================================================
 
     @Override
     public List<CandidatoPerPosizioneDTO> getCandidatiPerPosizione(Long idPosizione) {
@@ -116,6 +116,7 @@ public class PosizioneServiceImpl implements PosizioneService {
 
         List<CandidatoPerPosizioneDTO> out = new ArrayList<>();
 
+        // BUILD DTO
         for (Candidatura c : candidature) {
 
             CandidatoPerPosizioneDTO dto = new CandidatoPerPosizioneDTO();
@@ -130,34 +131,33 @@ public class PosizioneServiceImpl implements PosizioneService {
 
             dto.setStato(c.getStato().getCodice());
 
-            // -----------------------------
-            // SE LA POSIZIONE HA UN TEST
-            // -----------------------------
+            // ============================================================
+            // SE LA POSIZIONE PREVEDE UN TEST → carica punteggio
+            // ============================================================
             if (haTest) {
+
                 List<TentativoTest> tentativi =
                         tentativoTestRepository.findAllByIdCandidatura(c.getIdCandidatura());
 
-                TentativoTest tent = tentativi.stream()
+                TentativoTest ultimo = tentativi.stream()
                         .filter(t -> t.getCompletatoAt() != null)
                         .max(Comparator.comparing(TentativoTest::getCompletatoAt))
                         .orElse(null);
 
-                if (tent != null) {
-                    dto.setPunteggioTotale(tent.getPunteggioTotale());
+                if (ultimo != null) {
+                    dto.setPunteggioTotale(ultimo.getPunteggioTotale());
                     dto.setEsitoTentativo(
-                            tent.getIdEsitoTentativo() != null
-                                    ? tent.getIdEsitoTentativo().getCodice()
+                            ultimo.getIdEsitoTentativo() != null
+                                    ? ultimo.getIdEsitoTentativo().getCodice()
                                     : null
                     );
                 } else {
                     dto.setPunteggioTotale(0);
                     dto.setEsitoTentativo(null);
                 }
-            }
-            // -----------------------------
-            // SE NON HA TEST — nessun punteggio
-            // -----------------------------
-            else {
+
+            } else {
+                // NESSUN TEST → nessun punteggio
                 dto.setPunteggioTotale(null);
                 dto.setEsitoTentativo(null);
             }
@@ -165,18 +165,18 @@ public class PosizioneServiceImpl implements PosizioneService {
             out.add(dto);
         }
 
-        // =====================================================================
+        // ============================================================
         // ORDINAMENTO DINAMICO
-        // =====================================================================
+        // ============================================================
 
         if (haTest) {
-            // Ordine per punteggio decrescente
+            // ordina per punteggio DESC
             out.sort(Comparator.comparing(
                     CandidatoPerPosizioneDTO::getPunteggioTotale,
                     Comparator.nullsLast(Comparator.reverseOrder())
             ));
         } else {
-            // Ordine per data candidatura ASC
+            // ordina per data candidatura ASC
             out.sort((a, b) -> {
 
                 Candidatura cA = candidature.stream()
@@ -194,9 +194,9 @@ public class PosizioneServiceImpl implements PosizioneService {
         return out;
     }
 
-    // =====================================================================
+    // ============================================================
     // SALVA TOP 5
-    // =====================================================================
+    // ============================================================
 
     @Override
     public void salvaTop5(Long idPosizione, Top5Request req) {
@@ -216,18 +216,20 @@ public class PosizioneServiceImpl implements PosizioneService {
                         .orElseThrow(() -> new RuntimeException("Stato RESPINTA non trovato"));
 
         for (Candidatura c : tutte) {
+
             if (top5.contains(c.getIdCandidatura())) {
                 c.setStato(accettata);
             } else {
                 c.setStato(respinta);
             }
+
             candidaturaRepository.save(c);
         }
     }
 
-    // =====================================================================
+    // ============================================================
     // TOP CANDIDATI (limit)
-    // =====================================================================
+    // ============================================================
 
     @Override
     public List<CandidatoPerPosizioneDTO> getTopCandidati(Long idPosizione, int limit) {
