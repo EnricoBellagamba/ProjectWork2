@@ -165,55 +165,87 @@ public class TentativoTestController {
         return ResponseEntity.ok(response);
     }
 
-    // =====================================================================
-    // STORICO TENTATIVI
-    // =====================================================================
+    // =============================================================
+    //   STORICO TENTATIVI DELL’UTENTE LOGGATO
+    // =============================================================
     @GetMapping("/miei")
     @PreAuthorize("hasRole('CANDIDATO')")
     public ResponseEntity<List<TentativoListItemDto>> getMieiTentativi(Authentication auth) {
 
+        // 1) Sicurezza: se non c'è auth → 401 invece di NullPointerException
+        if (auth == null || !auth.isAuthenticated()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Utente non autenticato");
+        }
+
+        // 2) Ricavo l'utente loggato dalla mail nel token JWT
         Utente utente = utenteRepository.findByEmail(auth.getName())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utente non trovato"));
 
+        // 3) Tutte le candidature legate a questo utente
         List<Candidatura> candidature =
-                candidaturaRepository.findByCandidato_IdUtente_IdUtente(utente.getIdUtente()); // FIX
+                candidaturaRepository.findByCandidato_IdUtente_IdUtente(utente.getIdUtente());
 
-        if (candidature.isEmpty()) return ResponseEntity.ok(List.of());
+        if (candidature.isEmpty()) {
+            return ResponseEntity.ok(List.of());
+        }
 
         Set<Long> idCandidature = candidature.stream()
                 .map(Candidatura::getIdCandidatura)
                 .collect(Collectors.toSet());
 
+        // 4) Tutti i tentativi COMPLETATI collegati a quelle candidature
         List<TentativoTest> completati = tentativoTestRepository.findAll().stream()
-                .filter(t -> t.getCompletatoAt() != null && idCandidature.contains(t.getIdCandidatura()))
+                .filter(t -> t.getIdCandidatura() != null
+                        && idCandidature.contains(t.getIdCandidatura())
+                        && t.getCompletatoAt() != null)
                 .toList();
 
+        // 5) Teniamo SOLO l'ultimo tentativo per coppia (idTest, idCandidatura)
         Map<String, TentativoTest> ultimo = new HashMap<>();
 
         for (TentativoTest t : completati) {
             String key = t.getIdTest() + "#" + t.getIdCandidatura();
             TentativoTest existing = ultimo.get(key);
 
-            if (existing == null ||
-                    t.getCompletatoAt().isAfter(existing.getCompletatoAt())) {
+            if (existing == null) {
                 ultimo.put(key, t);
+            } else {
+                LocalDateTime current = t.getCompletatoAt();
+                LocalDateTime previous = existing.getCompletatoAt();
+
+                if (current != null && (previous == null || current.isAfter(previous))) {
+                    ultimo.put(key, t);
+                }
             }
         }
 
+        // 6) Ordino per data di completamento (dal più recente)
         List<TentativoListItemDto> result = ultimo.values().stream()
-                .sorted(Comparator.comparing(TentativoTest::getCompletatoAt).reversed())
+                .sorted(Comparator.comparing(
+                        TentativoTest::getCompletatoAt,
+                        Comparator.nullsLast(LocalDateTime::compareTo)
+                ).reversed())
                 .map(t -> {
+                    // Recupero info del Test
                     Test test = testRepository.findById(t.getIdTest()).orElse(null);
-                    int nDomande = (test != null)
+
+                    String titoloTest = (test != null) ? test.getTitolo() : "Test #" + t.getIdTest();
+                    Integer durataMinuti = (test != null) ? test.getDurataMinuti() : null;
+
+                    int numeroDomande = (test != null)
                             ? domandaRepository.countByTest_IdTest(test.getIdTest())
                             : 0;
 
-                    double percentuale = nDomande > 0
-                            ? (t.getPunteggioTotale() * 100.0) / nDomande
+                    double percentuale = numeroDomande > 0
+                            ? (t.getPunteggioTotale() * 100.0) / numeroDomande
                             : 0.0;
 
+                    // ⚠️ QUI usiamo il COSTRUTTORE COMPLETO del DTO
                     return new TentativoListItemDto(
                             t.getIdTentativo(),
+                            t.getIdTest(),
+                            titoloTest,
+                            durataMinuti,
                             t.getPunteggioTotale(),
                             t.getCodiceEsito(),
                             t.getCompletatoAt(),
@@ -225,9 +257,9 @@ public class TentativoTestController {
         return ResponseEntity.ok(result);
     }
 
-    // =====================================================================
-    // AVVIA TENTATIVO
-    // =====================================================================
+    // =============================================================
+    //   AVVIA TENTATIVO
+    // =============================================================
     @PostMapping("/{idTest}/avvia")
     @PreAuthorize("hasRole('CANDIDATO')")
     public ResponseEntity<AvviaTestResponse> avviaTentativo(
@@ -235,13 +267,13 @@ public class TentativoTestController {
             Authentication auth
     ) {
         Utente utente = utenteRepository.findByEmail(auth.getName())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utente non trovato"));
 
         Candidato candidato = candidatoRepository.findByIdUtente(utente)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Profilo candidato non trovato"));
 
         List<Candidatura> candidature =
-                candidaturaRepository.findByCandidato_IdUtente_IdUtente(utente.getIdUtente()); // FIX
+                candidaturaRepository.findByCandidato_IdUtente_IdUtente(utente.getIdUtente());
 
         if (candidature.isEmpty())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nessuna candidatura valida");
@@ -258,7 +290,11 @@ public class TentativoTestController {
         if (nonCompletato.isPresent()) {
             TentativoTest t = nonCompletato.get();
             return ResponseEntity.ok(
-                    new AvviaTestResponse(t.getIdTentativo(), idTest, t.getIniziatoAt().toString())
+                    new AvviaTestResponse(
+                            t.getIdTentativo(),
+                            t.getIdTest(),
+                            t.getIniziatoAt().toString()
+                    )
             );
         }
 
@@ -275,7 +311,6 @@ public class TentativoTestController {
         nuovo.setIdTest(idTest);
         nuovo.setIdCandidatura(idCandidatura);
         nuovo.setIniziatoAt(LocalDateTime.now());
-        nuovo.setCompletatoAt(null);
         nuovo.setPunteggioTotale(0);
 
         tentativoTestRepository.save(nuovo);
@@ -284,24 +319,27 @@ public class TentativoTestController {
                 .body(new AvviaTestResponse(
                         nuovo.getIdTentativo(),
                         idTest,
-                        nuovo.getIniziatoAt().toString())
-                );
+                        nuovo.getIniziatoAt().toString()
+                ));
     }
 
-    // =====================================================================
-    // DOMANDE DI UN TEST
-    // =====================================================================
+    // =============================================================
+    //   DOMANDE DEL TEST COLLEGATO A TENTATIVO
+    // =============================================================
     @GetMapping("/{idTentativo}/domande")
     @PreAuthorize("hasRole('CANDIDATO')")
     public ResponseEntity<GetDomandeResponse> domandePerTentativo(@PathVariable Long idTentativo) {
 
         TentativoTest t = tentativoTestRepository.findById(idTentativo)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tentativo non trovato"));
 
         Long idTest = t.getIdTest();
 
         Test test = testRepository.findById(idTest)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Test non trovato"
+                ));
+
 
         List<Domanda> domande = domandaRepository.findByTest_IdTest(idTest);
 
@@ -365,7 +403,7 @@ public class TentativoTestController {
     ) {
 
         TentativoTest t = tentativoTestRepository.findById(idTentativo)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tentativo non trovato"));
 
         Long idTest = t.getIdTest();
 
@@ -377,18 +415,23 @@ public class TentativoTestController {
         for (InviaRisposteRequest.RispostaInput r : req.getRisposte()) {
 
             Domanda domanda = domandaRepository.findById(r.getIdDomanda())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Domanda non valida"));
 
             Opzione opzione = (r.getIdOpzione() != null)
                     ? opzioneRepository.findById(r.getIdOpzione()).orElse(null)
                     : null;
 
             boolean corretta = opzione != null && Boolean.TRUE.equals(opzione.getIsCorretta());
-            int punti = corretta ? 1 : 0;
 
+            int punti = corretta ? 1 : 0;
             totale += punti;
 
-            Risposta rs = new Risposta(punti, t.getIdTentativo(), domanda.getIdDomanda(), r.getIdOpzione());
+            Risposta rs = new Risposta(
+                    punti,
+                    t.getIdTentativo(),
+                    domanda.getIdDomanda(),
+                    r.getIdOpzione()
+            );
             rispostaRepository.save(rs);
         }
 
@@ -396,16 +439,18 @@ public class TentativoTestController {
         t.setCompletatoAt(LocalDateTime.now());
 
         Test test = testRepository.findById(idTest)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Test non trovato"));
 
-        String codiceEsito = totale >= test.getPunteggioMin() ? "SUPERATO" : "NON_SUPERATO";
+        String codiceEsito = totale >= test.getPunteggioMin()
+                ? "SUPERATO"
+                : "NON_SUPERATO";
+
         EsitoTentativo esito = esitoTentativoRepository.findByCodice(codiceEsito).orElse(null);
         t.setIdEsitoTentativo(esito);
 
         tentativoTestRepository.save(t);
 
         int numeroDomande = domandaRepository.countByTest_IdTest(idTest);
-
         double percentuale = numeroDomande > 0
                 ? (totale * 100.0) / numeroDomande
                 : 0.0;
@@ -420,21 +465,20 @@ public class TentativoTestController {
         );
     }
 
-    // =====================================================================
-    // RISULTATO DETTAGLIATO DI UN TENTATIVO
-    // =====================================================================
+    // =============================================================
+    //   RISULTATO DEL TEST
+    // =============================================================
     @GetMapping("/{idTentativo}/risultato")
     @PreAuthorize("hasRole('CANDIDATO')")
     public ResponseEntity<RisultatoTentativoDettaglioDto> risultato(@PathVariable Long idTentativo) {
 
         TentativoTest t = tentativoTestRepository.findById(idTentativo)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tentativo non trovato"));
 
         Test test = testRepository.findById(t.getIdTest())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Test non trovato"));
 
         List<Risposta> risposte = rispostaRepository.findByIdTentativo_IdTentativo(idTentativo);
-
         int numeroDomande = domandaRepository.findByTest_IdTest(test.getIdTest()).size();
 
         long corrette = risposte.stream()
