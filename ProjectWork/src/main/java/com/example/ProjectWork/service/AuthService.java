@@ -31,4 +31,5 @@ public interface AuthService {
      *         e le informazioni essenziali dell'utente autenticato
      */
     LoginResponse login(LoginRequest req);
+    LoginResponse refresh(String refreshToken);
 }

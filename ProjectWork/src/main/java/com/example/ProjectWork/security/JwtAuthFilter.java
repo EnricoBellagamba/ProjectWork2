@@ -54,8 +54,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String token = authHeader.substring(7);
 
         if (!jwtService.isTokenValid(token)) {
-            // Token non valido / scaduto: continuiamo senza impostare autenticazione
-            filterChain.doFilter(request, response);
+            // Token non valido o scaduto, manda 401
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token scaduto");
             return;
         }
 

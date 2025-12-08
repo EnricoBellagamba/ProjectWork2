@@ -164,4 +164,30 @@ public class AuthServiceImpl implements AuthService {
 
         return "/uploads/cv/" + newFilename;
     }
+
+    @Override
+    public LoginResponse refresh(String refreshToken) {
+
+        // 1. Token non presente o non valido
+        if (refreshToken == null || !jwtService.isTokenValid(refreshToken)) {
+            throw new TokenNonValidoException("Refresh token non valido o scaduto.");
+        }
+
+        // 2. Estrai email dal refresh
+        String email = jwtService.extractEmail(refreshToken);
+
+        // 3. Carica utente
+        Utente utente = utenteRepository.findByEmail(email)
+                .orElseThrow(UtenteNonTrovatoException::new);
+
+        // 4. Genera nuovo access token
+        String newAccess = jwtService.generateAccessToken(utente);
+
+        // 5. Ritorna LoginResponse con SOLO access token aggiornato
+        // (il refresh non deve cambiare)
+        UtenteDto dto = UtenteDto.fromEntity(utente);
+
+        return new LoginResponse(newAccess, refreshToken, dto);
+    }
+
 }
