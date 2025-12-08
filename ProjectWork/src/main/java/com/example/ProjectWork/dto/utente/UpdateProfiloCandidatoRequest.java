@@ -3,11 +3,11 @@ package com.example.ProjectWork.dto.utente;
 public class UpdateProfiloCandidatoRequest {
     private String nome;
     private String cognome;
-    private String dataNascita; // "yyyy-MM-dd"
+    private String dataNascita;
     private String telefono;
     private String citta;
     private String lingua;
-    private String cvUrl; // opzionale (di fatto lo usi in output)
+    private String cvUrl;
 
     public String getNome() {
         return nome;

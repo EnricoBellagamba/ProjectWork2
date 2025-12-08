@@ -12,15 +12,7 @@ public class StrutturaTestResponse {
     private String tipo;
     private List<DomandaDto> domande;
 
-    public StrutturaTestResponse(
-            Long idTest,
-            String titolo,
-            String descrizione,
-            Integer durataMinuti,
-            Integer numeroDomande,
-            Integer punteggioMin,
-            String tipo,
-            List<DomandaDto> domande
+    public StrutturaTestResponse(Long idTest, String titolo, String descrizione, Integer durataMinuti, Integer numeroDomande, Integer punteggioMin, String tipo, List<DomandaDto> domande
     ) {
         this.idTest = idTest;
         this.titolo = titolo;

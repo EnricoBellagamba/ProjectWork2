@@ -27,7 +27,7 @@ public class InviaRisposteRequest {
 
     public static class RispostaInput {
         private Long idDomanda;
-        private Long idOpzione; // può essere null
+        private Long idOpzione;
 
         public RispostaInput() {
         }

@@ -4,19 +4,14 @@ public class CandidatoPerPosizioneDTO {
 
     private Long idCandidatura;
     private Long idCandidato;
-
     private String nome;
     private String cognome;
     private String email;
-
     private String cvUrl;
-
     private Integer punteggioTotale;
     private String esitoTentativo;
-
     private String stato;
     private Integer numeroDomande;
-
 
     public CandidatoPerPosizioneDTO(Long idCandidatura, Long idCandidato, String nome, String cognome, String email, String cvUrl, Integer punteggioTotale, String esitoTentativo, String stato, Integer numeroDomande) {
         this.idCandidatura = idCandidatura;
@@ -30,7 +25,6 @@ public class CandidatoPerPosizioneDTO {
         this.stato = stato;
         this.numeroDomande = numeroDomande;
     }
-
 
     public CandidatoPerPosizioneDTO() {}
 

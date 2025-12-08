@@ -12,19 +12,13 @@ public class CandidaturaMiaDto {
     public CandidaturaMiaDto() {
     }
 
-    public CandidaturaMiaDto(Long idCandidatura,
-                             PosizioneDto posizione,
-                             String createdAT,
-                             StatoDto stato,
-                             Integer punteggioTest,
-                             Integer numeroDomande) {
+    public CandidaturaMiaDto(Long idCandidatura, PosizioneDto posizione, String createdAT, StatoDto stato, Integer punteggioTest, Integer numeroDomande) {
         this.idCandidatura = idCandidatura;
         this.posizione = posizione;
         this.createdAT = createdAT;
         this.stato = stato;
         this.punteggioTest = punteggioTest;
         this.numeroDomande = numeroDomande;
-
     }
 
     public Integer getNumeroDomande() {

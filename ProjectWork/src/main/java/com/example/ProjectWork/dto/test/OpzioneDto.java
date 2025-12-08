@@ -6,18 +6,15 @@ public class OpzioneDto {
     private String testoOpzione;
     private Boolean corretta;
 
-    // Costruttore vuoto per Jackson
     public OpzioneDto() {
     }
 
-    // Costruttore a 2 argomenti (compatibilità col codice vecchio)
     public OpzioneDto(Long idOpzione, String testoOpzione) {
         this.idOpzione = idOpzione;
         this.testoOpzione = testoOpzione;
         this.corretta = null;
     }
 
-    // Costruttore completo a 3 argomenti (nuovo)
     public OpzioneDto(Long idOpzione, String testoOpzione, Boolean corretta) {
         this.idOpzione = idOpzione;
         this.testoOpzione = testoOpzione;

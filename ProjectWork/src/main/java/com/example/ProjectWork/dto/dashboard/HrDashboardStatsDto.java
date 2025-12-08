@@ -10,10 +10,7 @@ public class HrDashboardStatsDto {
     public HrDashboardStatsDto() {
     }
 
-    public HrDashboardStatsDto(long totalePosizioni,
-                               long totaleCandidature,
-                               long totaleTest,
-                               long totaleTentativi) {
+    public HrDashboardStatsDto(long totalePosizioni, long totaleCandidature, long totaleTest, long totaleTentativi) {
         this.totalePosizioni = totalePosizioni;
         this.totaleCandidature = totaleCandidature;
         this.totaleTest = totaleTest;
