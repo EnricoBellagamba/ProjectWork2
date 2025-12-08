@@ -9,12 +9,6 @@ import java.util.List;
 @Repository
 public interface DomandaRepository extends JpaRepository<Domanda, Long> {
 
-    /**
-     * Restituisce tutte le domande appartenenti a un certo test.
-     *
-     * Usa la relazione ManyToOne:
-     *   Domanda.test.idTest
-     */
     List<Domanda> findByTest_IdTest(Long idTest);
 
     int countByTest_IdTest(Long idTest);

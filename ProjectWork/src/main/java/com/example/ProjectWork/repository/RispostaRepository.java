@@ -7,9 +7,5 @@ import java.util.List;
 
 public interface RispostaRepository extends JpaRepository<Risposta, Long> {
 
-    /**
-     * Tutte le risposte associate a un certo tentativo.
-     * Verrà usato per calcolare il riepilogo (numero risposte, corrette, ecc.).
-     */
     List<Risposta> findByIdTentativo_IdTentativo(Long idTentativo);
 }

@@ -29,7 +29,6 @@ public class Risposta {
     @JoinColumn(name = "scelta")
     private Opzione idOpzione; // scelta
 
-    // ===================== COSTRUTTORI =====================
     public Risposta() {}
 
 
@@ -48,7 +47,7 @@ public class Risposta {
         this.idOpzione = idOpzione;
     }
 
-    // ===================== GETTER / SETTER =====================
+    //GETTER E SETTER -----------------------------------------------------------------------------------------------
 
     public Long getIdRisposta() {
         return idRisposta;

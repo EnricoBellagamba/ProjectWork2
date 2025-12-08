@@ -7,7 +7,6 @@ import com.example.ProjectWork.exception.EmailGiaRegistrataException;
 import com.example.ProjectWork.exception.PasswordErrataException;
 import com.example.ProjectWork.exception.RuoloNonValidoException;
 import com.example.ProjectWork.exception.UtenteNonTrovatoException;
-import com.example.ProjectWork.model.EmailBloccata;
 import com.example.ProjectWork.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -18,7 +17,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")

@@ -38,7 +38,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        // Se c'è già un utente autenticato nel contesto, non rifacciamo niente
         if (SecurityContextHolder.getContext().getAuthentication() != null) {
             filterChain.doFilter(request, response);
             return;
@@ -84,7 +83,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
-        // Non filtriamo le chiamate di autenticazione (login / register)
         return path.startsWith("/api/auth/");
     }
 }

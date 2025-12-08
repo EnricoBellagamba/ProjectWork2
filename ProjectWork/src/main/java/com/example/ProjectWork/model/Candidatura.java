@@ -26,9 +26,7 @@ public class Candidatura {
     @Column(nullable = false)
     private LocalDate createdAt;
 
-    // ======================================
-    // GETTERS & SETTERS
-    // ======================================
+    //GETTER E SETTER -----------------------------------------------------------------------------------------------
 
     public Long getIdCandidatura() {
         return idCandidatura;

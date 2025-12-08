@@ -23,6 +23,9 @@ public class Ruolo {
     @JsonManagedReference
     private List<Utente> utenti;
 
+    //GETTER E SETTER -----------------------------------------------------------------------------------------------
+
+
     public Long getIdRuolo() {
         return idRuolo;
     }

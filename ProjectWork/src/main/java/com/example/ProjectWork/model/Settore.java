@@ -18,6 +18,8 @@ public class Settore {
     @Column
     private String descrizione;
 
+    //GETTER E SETTER -----------------------------------------------------------------------------------------------
+
     public Long getIdSettore() {
         return idSettore;
     }

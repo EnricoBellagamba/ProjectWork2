@@ -25,6 +25,7 @@ public class Candidato {
     @OneToMany(mappedBy = "candidato", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Candidatura> candidature = new ArrayList<>();
 
+    //GETTER E SETTER -----------------------------------------------------------------------------------------------
 
     public Long getIdCandidato() {
         return idCandidato;

@@ -19,6 +19,8 @@ public class StatoCandidatura {
     @Column(nullable = false)
     private Boolean isFinale;
 
+    //GETTER E SETTER -----------------------------------------------------------------------------------------------
+
     public Long getIdStatoCandidatura() {
         return idStatoCandidatura;
     }

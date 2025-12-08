@@ -171,7 +171,6 @@ public class PosizioneServiceImpl implements PosizioneService {
                 }
 
             } else {
-                // NESSUN TEST → nessun punteggio
                 dto.setPunteggioTotale(null);
                 dto.setEsitoTentativo(null);
             }

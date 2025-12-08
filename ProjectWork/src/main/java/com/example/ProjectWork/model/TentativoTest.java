@@ -14,7 +14,6 @@ public class TentativoTest {
     @Column(name = "idCandidatura")
     private Long idCandidatura;
 
-    // AGGIUNTA DELLA RELAZIONE CORRETTA
     @ManyToOne
     @JoinColumn(name = "idCandidatura", insertable = false, updatable = false)
     private Candidatura candidatura;
@@ -52,6 +51,8 @@ public class TentativoTest {
         this.completatoAt = completatoAt;
         this.punteggioTotale = punteggioTotale;
     }
+
+    //GETTER E SETTER -----------------------------------------------------------------------------------------------
 
     public Long getIdTentativo() { return idTentativo; }
     public void setIdTentativo(Long idTentativo) { this.idTentativo = idTentativo; }
