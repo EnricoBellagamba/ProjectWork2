@@ -21,4 +21,10 @@ public interface CandidaturaRepository extends JpaRepository<Candidatura, Long> 
 
     // Tutte le candidature legate a una posizione → usato lato HR
     List<Candidatura> findByPosizione_IdPosizione(Long idPosizione);
+
+    /**
+     * Conta le candidature relative a posizioni create da un certo HR.
+     * (naviga la relazione posizione.createdByHR)
+     */
+    long countByPosizione_CreatedByHR(com.example.ProjectWork.model.Utente createdByHR);
 }

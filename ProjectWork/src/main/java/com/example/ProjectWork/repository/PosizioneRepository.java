@@ -14,6 +14,14 @@ public interface PosizioneRepository extends JpaRepository<Posizione, Long> {
      */
     List<Posizione> findByCreatedByHR(Utente createdByHR);
 
+    /**
+     * Conta quante posizioni sono state create da un certo HR.
+     * Usato nella dashboard HR.
+     */
+    long countByCreatedByHR(Utente createdByHR);
+
     boolean existsByIdTest(Long idTest);
+
+
 
 }
