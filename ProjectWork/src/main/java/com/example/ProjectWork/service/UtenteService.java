@@ -3,6 +3,7 @@ package com.example.ProjectWork.service;
 import com.example.ProjectWork.dto.utente.UpdatePasswordRequest;
 import com.example.ProjectWork.dto.utente.UpdateProfiloCandidatoRequest;
 import com.example.ProjectWork.dto.utente.UtenteDto;
+import com.example.ProjectWork.model.Posizione;
 import com.example.ProjectWork.model.Utente;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -73,4 +74,10 @@ public interface UtenteService {
      * @param idPosizione l’ID della posizione da aggiungere alle preferenze
      */
     void aggiungiPosizionePreferita(Long idUtente, Long idPosizione);
+
+    void addFavoritePosition(Long idPosizione, Long idUtente);
+
+    void removeFavoritePosition(Long idPosizione, Long idUtente);
+
+    List<Posizione> getPosizioniPreferiteByIdUtente(Long idUtente);
 }

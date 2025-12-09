@@ -43,7 +43,7 @@ public class Utente {
     private String cognome;
 
     @Column(nullable = false)
-    private Instant lastLogin; //memorizza un punto preciso nel tempo in UTC. Ottimo se vuoi uniformità e usi microservizi / più server.
+    private Instant lastLogin;
 
     @Column(nullable = false)
     private LocalDate dataNascita;
@@ -78,6 +78,7 @@ public class Utente {
     @ManyToMany
     @JoinTable(
             name = "UTENTE_POSIZIONE_PREFERITA",
+            schema = "dbo",
             joinColumns = @JoinColumn(name = "idUtente"),
             inverseJoinColumns = @JoinColumn(name = "idPosizione")
     )

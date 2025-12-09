@@ -3,6 +3,7 @@ import com.example.ProjectWork.dto.utente.UpdatePasswordRequest;
 import com.example.ProjectWork.dto.utente.UpdateProfiloCandidatoRequest;
 import com.example.ProjectWork.dto.utente.UtenteDto;
 import com.example.ProjectWork.model.EmailBloccata;
+import com.example.ProjectWork.model.Posizione;
 import com.example.ProjectWork.model.Utente;
 import com.example.ProjectWork.repository.EmailBloccataRepository;
 import com.example.ProjectWork.repository.UtenteRepository;
@@ -103,13 +104,35 @@ public class UtenteController {
     }
 
     @PostMapping("/{idUtente}/preferiti/{idPosizione}")
-    public ResponseEntity<?> aggiungiPosizionePreferita(
-            @PathVariable Long idUtente,
-            @PathVariable Long idPosizione) {
 
-        utenteService.aggiungiPosizionePreferita(idUtente, idPosizione);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Void> addFavorite(@PathVariable Long idUtente,
+
+                                            @PathVariable Long idPosizione) {
+
+        utenteService.addFavoritePosition(idPosizione, idUtente);
+
+        return ResponseEntity.noContent().build();
+
     }
+
+    @DeleteMapping("/{idUtente}/preferiti/{idPosizione}")
+
+    public ResponseEntity<Void> removeFavorite(@PathVariable Long idUtente,
+
+                                               @PathVariable Long idPosizione) {
+
+        utenteService.removeFavoritePosition(idPosizione, idUtente);
+
+        return ResponseEntity.noContent().build();
+
+    }
+
+    @GetMapping("/{idUtente}/preferiti")
+    public ResponseEntity<List<Posizione>> getPreferiti(@PathVariable Long idUtente) {
+        List<Posizione> posizioni = utenteService.getPosizioniPreferiteByIdUtente(idUtente);
+        return ResponseEntity.ok(posizioni);
+    }
+
 
 }
 

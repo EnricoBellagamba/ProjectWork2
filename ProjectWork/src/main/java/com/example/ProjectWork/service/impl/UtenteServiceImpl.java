@@ -161,4 +161,49 @@ public class UtenteServiceImpl implements UtenteService {
         utente.getPosizioniPreferite().add(posizione);
         utenteRepository.save(utente);
     }
+
+    // ============================================================
+    // AGGIUNGE AI PREFERITI UNA POSIZIONE
+    // ============================================================
+
+    @Override
+    public void addFavoritePosition(Long idPosizione, Long idUtente) {
+
+        Posizione posizione = posizioneRepository.findById(idPosizione)
+                .orElseThrow(() -> new RuntimeException("Posizione non trovata"));
+
+        Utente utente = utenteRepository.findById(idUtente)
+                .orElseThrow(() -> new RuntimeException("Utente non trovato"));
+
+        if(!utente.getPosizioniPreferite().contains(posizione)){
+            utente.getPosizioniPreferite().add(posizione);
+            utenteRepository.save(utente);
+        }
+
+    }
+
+    @Override
+
+    public void removeFavoritePosition(Long idPosizione, Long idUtente) {
+
+        Utente utente = utenteRepository.findById(idUtente).orElseThrow(() -> new  RuntimeException("Utente non trovato"));
+
+        utente.getPosizioniPreferite().removeIf(p -> p.getIdPosizione().equals(idPosizione));
+
+        utenteRepository.save(utente);
+
+    }
+
+
+    @Override
+
+    public List<Posizione> getPosizioniPreferiteByIdUtente(Long idUtente) {
+
+        Utente utente = utenteRepository.findById(idUtente).orElseThrow(() -> new RuntimeException("Utente non trovato"));
+
+        return utente.getPosizioniPreferite();
+
+    }
+
+
 }
