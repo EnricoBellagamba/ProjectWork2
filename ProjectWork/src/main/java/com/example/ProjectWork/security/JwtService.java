@@ -6,6 +6,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
@@ -18,14 +19,16 @@ import java.util.Map;
 @Service
 public class JwtService {
 
-    // Chiave segreta per HS256: almeno 32 caratteri
-    // In produzione: spostare in application.properties o variabile d'ambiente
-    private static final String SECRET_KEY =
-            "candidai-secret-key-very-long-min-32-characters-123456";
+    // Chiave segreta per HS256: almeno 32 caratteri, impostata in application.properties
+    @Value("${jwt.secret}")
+    private String SECRET_KEY;
 
     // Scadenze token
-    private static final long ACCESS_EXP = 24L * 60L * 60L * 1000L; // 24 ore
-    private static final long REFRESH_EXP = 7L * 24L * 60L * 60L * 1000L; // 7 giorni
+    @Value("${jwt.access-exp}")
+    private long ACCESS_EXP;
+
+    @Value("${jwt.refresh-exp}")
+    private long REFRESH_EXP;
 
     private Key getKey() {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
