@@ -11,7 +11,6 @@ public interface OpzioneRepository extends JpaRepository<Opzione, Long> {
 
     /**
      * Restituisce tutte le opzioni appartenenti a una certa domanda.
-     *
      * Usa la relazione ManyToOne:
      *   Opzione.domanda.idDomanda
      */

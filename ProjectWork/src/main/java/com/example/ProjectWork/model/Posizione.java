@@ -58,7 +58,6 @@ public class Posizione {
     @ManyToMany(mappedBy = "posizioniPreferite")
     private List<Utente> utentiCheHannoPreferito = new ArrayList<>();
 
-    // ID del test associato alla posizione (FK su TEST.idTest)
     @Column(name = "idTest")
     private Long idTest;
 
@@ -72,7 +71,7 @@ public class Posizione {
         }
     }
 
-    // GETTER E SETTER -------------------------
+    //GETTER E SETTER -----------------------------------------------------------------------------------------------
 
     public Long getIdPosizione() {
         return idPosizione;

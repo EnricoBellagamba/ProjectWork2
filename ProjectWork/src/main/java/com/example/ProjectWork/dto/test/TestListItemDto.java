@@ -7,12 +7,7 @@ public class TestListItemDto {
     private Integer durataMinuti;
     private String descrizione;
 
-    public TestListItemDto(
-            Long idTest,
-            String titolo,
-            String tipo,
-            Integer durataMinuti,
-            String descrizione
+    public TestListItemDto(Long idTest, String titolo, String tipo, Integer durataMinuti, String descrizione
     ) {
         this.idTest = idTest;
         this.titolo = titolo;

@@ -15,6 +15,8 @@ public class StatoPosizione {
     @Column
     private String descrizione;
 
+    //GETTER E SETTER -----------------------------------------------------------------------------------------------
+
     public Long getIdStatoPosizione() {
         return idStatoPosizione;
     }

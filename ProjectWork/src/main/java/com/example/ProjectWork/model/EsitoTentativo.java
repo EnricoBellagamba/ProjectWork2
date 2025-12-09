@@ -17,8 +17,6 @@ public class EsitoTentativo {
     @Column
     private String descrizione;
 
-    // ===================== COSTRUTTORI =====================
-
     public EsitoTentativo() {
     }
 
@@ -27,7 +25,7 @@ public class EsitoTentativo {
         this.descrizione = descrizione;
     }
 
-    // ===================== GETTER / SETTER =====================
+    //GETTER E SETTER -----------------------------------------------------------------------------------------------
 
     public Long getIdEsitoTentativo() {
         return idEsitoTentativo;

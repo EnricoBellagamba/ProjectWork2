@@ -21,20 +21,7 @@ public class RisultatoTentativoDettaglioDto {
 
     }
 
-    public RisultatoTentativoDettaglioDto(
-            Long idTentativo,
-            Long idTest,
-            String titoloTest,
-            Double percentuale,
-            Integer punteggioTotale,
-            Integer punteggioMin,
-            String esito,
-            LocalDateTime completatoAt,
-            Integer durataUsataMinuti,
-            Integer numeroDomande,
-            Integer numeroCorrette,
-            Integer numeroErrate,
-            Integer numeroNonRisposte
+    public RisultatoTentativoDettaglioDto(Long idTentativo, Long idTest, String titoloTest, Double percentuale, Integer punteggioTotale, Integer punteggioMin, String esito, LocalDateTime completatoAt, Integer durataUsataMinuti, Integer numeroDomande, Integer numeroCorrette, Integer numeroErrate, Integer numeroNonRisposte
     ) {
         this.idTentativo = idTentativo;
         this.idTest = idTest;

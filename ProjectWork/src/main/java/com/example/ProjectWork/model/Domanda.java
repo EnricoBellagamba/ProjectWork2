@@ -18,8 +18,6 @@ public class Domanda {
     @Column(nullable = false)
     private String testo;
 
-    // ===== COSTRUTTORI =====
-
     public Domanda() {
         // costruttore vuoto richiesto da JPA
     }
@@ -29,7 +27,7 @@ public class Domanda {
         this.testo = testo;
     }
 
-    // ===== GETTER E SETTER =====
+    //GETTER E SETTER -----------------------------------------------------------------------------------------------
 
     public Long getIdDomanda() {
         return idDomanda;

@@ -9,12 +9,7 @@ public class GetDomandeResponse {
     private Integer durataMinuti;
     private List<DomandaDto> domande;
 
-    public GetDomandeResponse(
-            Long idTentativo,
-            Long idTest,
-            String titoloTest,
-            Integer durataMinuti,
-            List<DomandaDto> domande
+    public GetDomandeResponse(Long idTentativo, Long idTest, String titoloTest, Integer durataMinuti, List<DomandaDto> domande
     ) {
         this.idTentativo = idTentativo;
         this.idTest = idTest;

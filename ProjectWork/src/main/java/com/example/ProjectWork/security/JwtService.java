@@ -24,7 +24,7 @@ public class JwtService {
             "candidai-secret-key-very-long-min-32-characters-123456";
 
     // Scadenze token
-    private static final long ACCESS_EXP = 60L * 60L * 1000L;             // 1 ora
+    private static final long ACCESS_EXP = 24L * 60L * 60L * 1000L; // 24 ore
     private static final long REFRESH_EXP = 7L * 24L * 60L * 60L * 1000L; // 7 giorni
 
     private Key getKey() {

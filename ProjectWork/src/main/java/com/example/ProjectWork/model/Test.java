@@ -38,6 +38,8 @@ public class Test {
     @JoinColumn(name = "idTipoTest")
     private TipoTest tipoTest;
 
+    //GETTER E SETTER -----------------------------------------------------------------------------------------------
+
     public Long getIdTest() {
         return idTest;
     }

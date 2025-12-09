@@ -3,11 +3,7 @@ package com.example.ProjectWork.controller;
 import com.example.ProjectWork.dto.auth.LoginRequest;
 import com.example.ProjectWork.dto.auth.LoginResponse;
 import com.example.ProjectWork.dto.auth.RegisterRequest;
-import com.example.ProjectWork.exception.EmailGiaRegistrataException;
-import com.example.ProjectWork.exception.PasswordErrataException;
-import com.example.ProjectWork.exception.RuoloNonValidoException;
-import com.example.ProjectWork.exception.UtenteNonTrovatoException;
-import com.example.ProjectWork.model.EmailBloccata;
+import com.example.ProjectWork.exception.*;
 import com.example.ProjectWork.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -18,7 +14,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -65,4 +60,18 @@ public class AuthController {
                     .body(Map.of("error", "CREDENZIALI_NON_VALIDE"));
         }
     }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refresh(@RequestBody Map<String, String> req) {
+        String refreshToken = req.get("refreshToken");
+
+        try {
+            LoginResponse resp = authService.refresh(refreshToken);
+            return ResponseEntity.ok(resp);
+        } catch (TokenNonValidoException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "REFRESH_TOKEN_INVALIDO"));
+        }
+    }
+
 }

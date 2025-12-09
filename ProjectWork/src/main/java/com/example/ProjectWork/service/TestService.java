@@ -5,49 +5,54 @@ import com.example.ProjectWork.model.Test;
 import java.util.List;
 
 /**
- * Servizio applicativo per la gestione dei Test.
- * Espone le operazioni CRUD di base utilizzate dai controller HR e candidato.
+ * Interfaccia di servizio dedicata alla gestione dei test di valutazione.
+ * Fornisce operazioni CRUD e applica le regole di business relative
+ * alla durata, alla struttura e alla validazione dei punteggi.
  */
 public interface TestService {
 
     /**
-     * Restituisce la lista di tutti i test presenti a sistema.
+     * Restituisce la lista completa di tutti i test presenti nel sistema.
+     *
+     * @return una lista di {@link Test}
      */
     List<Test> getAllTests();
 
     /**
-     * Restituisce il test con l'id specificato.
+     * Recupera un test tramite il suo identificativo.
      *
-     * @param id identificativo del test
-     * @return entità Test
-     * @throws RuntimeException se il test non viene trovato
+     * @param id l'ID del test da recuperare
+     * @return l'entità {@link Test} corrispondente
+     * @throws RuntimeException se nessun test corrispondente viene trovato
      */
     Test getTestById(Long id);
 
     /**
-     * Crea un nuovo test.
-     * Applica i vincoli di business su durata, numero domande e punteggi.
+     * Crea e salva un nuovo test.
+     * Durante la creazione vengono applicati i vincoli di business
+     * relativi a durata massima, numero minimo/massimo di domande
+     * e coerenza dei punteggi.
      *
-     * @param newTest entità Test da creare
-     * @return Test creato e salvato
+     * @param newTest l'entità {@link Test} da creare
+     * @return il test creato
      */
     Test createTest(Test newTest);
 
     /**
-     * Aggiorna un test esistente.
-     * Applica i vincoli di business su durata, numero domande e punteggi.
+     * Aggiorna un test esistente applicando le regole di validazione
+     * su durata, domande e punteggi.
      *
-     * @param id   id del test da aggiornare
-     * @param test dati aggiornati
-     * @return Test aggiornato
-     * @throws RuntimeException se il test non viene trovato
+     * @param id   l'ID del test da aggiornare
+     * @param test l'entità contenente i dati aggiornati
+     * @return il test aggiornato
+     * @throws RuntimeException se il test da aggiornare non esiste
      */
     Test updateTest(Long id, Test test);
 
     /**
-     * Elimina il test con l'id specificato.
+     * Elimina un test tramite il suo identificativo.
      *
-     * @param id id del test da eliminare
+     * @param idTest l'ID del test da eliminare
      */
-    void deleteTest(Long id);
+    void deleteTest(Long idTest);
 }

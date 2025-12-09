@@ -12,19 +12,8 @@ public class TentativoListItemDto {
     private LocalDateTime completatoAt;
     private Double percentuale;
 
-    public TentativoListItemDto() {
 
-    }
-
-    public TentativoListItemDto(
-            Long idTentativo,
-            Long idTest,
-            String titoloTest,
-            Integer durataMinuti,
-            Integer punteggioTotale,
-            String esito,
-            LocalDateTime completatoAt,
-            Double percentuale
+    public TentativoListItemDto(Long idTentativo, Long idTest, String titoloTest, Integer durataMinuti, Integer punteggioTotale, String esito, LocalDateTime completatoAt, Double percentuale
     ) {
         this.idTentativo = idTentativo;
         this.idTest = idTest;

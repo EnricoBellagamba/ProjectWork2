@@ -20,6 +20,8 @@ public class PosizioneServiceImpl implements PosizioneService {
     private final CandidaturaRepository candidaturaRepository;
     private final TentativoTestRepository tentativoTestRepository;
     private final StatoCandidaturaRepository statoCandidaturaRepository;
+    private final TestRepository testRepository;
+
 
     public PosizioneServiceImpl(
             PosizioneRepository posizioneRepository,
@@ -27,7 +29,7 @@ public class PosizioneServiceImpl implements PosizioneService {
             StatoPosizioneRepository statoPosizioneRepository,
             CandidaturaRepository candidaturaRepository,
             TentativoTestRepository tentativoTestRepository,
-            StatoCandidaturaRepository statoCandidaturaRepository
+            StatoCandidaturaRepository statoCandidaturaRepository, TestRepository testRepository
     ) {
         this.posizioneRepository = posizioneRepository;
         this.settoreRepository = settoreRepository;
@@ -35,6 +37,7 @@ public class PosizioneServiceImpl implements PosizioneService {
         this.candidaturaRepository = candidaturaRepository;
         this.tentativoTestRepository = tentativoTestRepository;
         this.statoCandidaturaRepository = statoCandidaturaRepository;
+        this.testRepository = testRepository;
     }
 
     // ============================================================
@@ -109,15 +112,25 @@ public class PosizioneServiceImpl implements PosizioneService {
         Posizione posizione = posizioneRepository.findById(idPosizione)
                 .orElseThrow(() -> new RuntimeException("Posizione non trovata"));
 
-        boolean haTest = posizione.getIdTest() != null;
+            boolean haTest = posizione.getIdTest() != null;
 
         List<Candidatura> candidature =
                 candidaturaRepository.findByPosizione_IdPosizione(idPosizione);
 
         List<CandidatoPerPosizioneDTO> out = new ArrayList<>();
+        Integer numeroDomande = null;
+        Test test = null;
 
-        // BUILD DTO
+        // COSTRUZIONE DEL DTO PER L'INVIO DI DATI RIFERITI ALL'UTENTE E ALLA SINGOLA CANDIDATURA
         for (Candidatura c : candidature) {
+
+            if (c.getPosizione().getIdTest() != null) {
+                test = testRepository.findById(c.getPosizione().getIdTest()).orElse(null);
+                if (test != null) {
+                    numeroDomande = test.getNumeroDomande();
+                }
+            }
+
 
             CandidatoPerPosizioneDTO dto = new CandidatoPerPosizioneDTO();
             dto.setIdCandidatura(c.getIdCandidatura());
@@ -130,6 +143,7 @@ public class PosizioneServiceImpl implements PosizioneService {
             dto.setCvUrl(u.getCvUrl());
 
             dto.setStato(c.getStato().getCodice());
+            dto.setNumeroDomande(numeroDomande);
 
             // ============================================================
             // SE LA POSIZIONE PREVEDE UN TEST → carica punteggio
@@ -157,7 +171,6 @@ public class PosizioneServiceImpl implements PosizioneService {
                 }
 
             } else {
-                // NESSUN TEST → nessun punteggio
                 dto.setPunteggioTotale(null);
                 dto.setEsitoTentativo(null);
             }

@@ -67,11 +67,9 @@ public class UtenteServiceImpl implements UtenteService {
 
         Utente existing = this.getUtenteById(id);
 
-        // Nome e cognome
         if (req.getNome() != null && !req.getNome().isBlank()) existing.setNome(req.getNome());
         if (req.getCognome() != null && !req.getCognome().isBlank()) existing.setCognome(req.getCognome());
 
-        // Data di nascita
         if (req.getDataNascita() != null && !req.getDataNascita().isBlank()) {
             try {
                 existing.setDataNascita(LocalDate.parse(req.getDataNascita()));
@@ -80,12 +78,10 @@ public class UtenteServiceImpl implements UtenteService {
             }
         }
 
-        // Telefono, città, lingua
         if (req.getTelefono() != null) existing.setTelefono(req.getTelefono());
         if (req.getCitta() != null) existing.setCitta(req.getCitta());
         if (req.getLingua() != null) existing.setLingua(req.getLingua());
 
-        // Upload CV
         if (cvFile != null && !cvFile.isEmpty()) {
 
             // 1) Salva nel filesystem backend
@@ -113,9 +109,6 @@ public class UtenteServiceImpl implements UtenteService {
         utenteRepository.save(existing);
     }
 
-    /**
-     * Salvataggio CV backend
-     */
     private String salvaCvSuFileSystem(MultipartFile cvFile) throws IOException {
         Files.createDirectories(BACKEND_CV_DIR);
 

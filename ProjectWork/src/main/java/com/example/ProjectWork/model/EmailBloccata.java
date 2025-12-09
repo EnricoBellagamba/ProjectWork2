@@ -23,6 +23,8 @@ public class EmailBloccata {
     @Column
     private LocalDateTime dataRiabilitazione;
 
+    //GETTER E SETTER -----------------------------------------------------------------------------------------------
+
     public String getEmail() {
         return email;
     }

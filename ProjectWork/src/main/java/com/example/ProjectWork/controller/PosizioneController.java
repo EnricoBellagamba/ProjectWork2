@@ -119,10 +119,37 @@ public class PosizioneController {
     @GetMapping("/{idPosizione}/candidati")
     @PreAuthorize("hasRole('HR')")
     public ResponseEntity<List<CandidatoPerPosizioneDTO>> getCandidatiPerPosizione(
-            @PathVariable Long idPosizione) {
+            @PathVariable Long idPosizione,
+            Authentication authentication) {
 
-        return ResponseEntity.ok(posizioneService.getCandidatiPerPosizione(idPosizione));
+        if (authentication == null)
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Utente non autenticato");
+
+        // HR loggato
+        String email = authentication.getName();
+        Utente hr = utenteRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Utente HR non trovato"));
+
+        Posizione posizione = posizioneRepository.findById(idPosizione)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Posizione non trovata"));
+
+        if (posizione.getCreatedByHR() == null ||
+                !posizione.getCreatedByHR().getIdUtente().equals(hr.getIdUtente())) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Non puoi visualizzare i candidati di posizioni create da altri HR"
+            );
+        }
+
+        // Se ok → restituisci i candidati
+        return ResponseEntity.ok(
+                posizioneService.getCandidatiPerPosizione(idPosizione)
+        );
     }
+
 
     // ===========================================================================================
     // SALVATAGGIO TOP 5

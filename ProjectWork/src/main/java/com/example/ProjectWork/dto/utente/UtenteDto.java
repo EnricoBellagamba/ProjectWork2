@@ -7,7 +7,7 @@ public class UtenteDto {
     private String email;
     private String nome;
     private String cognome;
-    private String ruolo;      // codice ruolo: "CANDIDATO"/"HR"
+    private String ruolo;
     private String dataNascita;
     private String telefono;
     private String citta;

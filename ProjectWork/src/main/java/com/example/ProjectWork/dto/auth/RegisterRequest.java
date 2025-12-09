@@ -4,26 +4,14 @@ public class RegisterRequest {
 
     private String email;
     private String password;
-
     private String nome;
     private String cognome;
-
-    // codice ruolo: es. "CANDIDATO" oppure "HR"
     private String ruolo;
-
-    // opzionali / anagrafica
     private String telefono;
-    // in formato testo "yyyy-MM-dd" (verrà poi parsata in LocalDate nel service)
     private String dataNascita;
     private String citta;
-
-    // es. "it-IT", "en-US"...
     private String lingua;
-
-    // privacy
     private boolean consensoPrivacy;
-
-    // URL del CV salvato sul file system
     private String cvUrl;
 
     public RegisterRequest() {

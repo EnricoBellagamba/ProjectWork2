@@ -18,11 +18,8 @@ public class Opzione {
     @Column(name = "testoOpzione", nullable = false)
     private String testoOpzione;
 
-    // nel DB: isCorretta BIT NOT NULL DEFAULT(0)
     @Column(name = "isCorretta", nullable = false)
     private Boolean isCorretta;
-
-    // ===== COSTRUTTORI =====
 
     public Opzione() {
         // richiesto da JPA
@@ -34,7 +31,7 @@ public class Opzione {
         this.isCorretta = isCorretta;
     }
 
-    // ===== GETTER E SETTER =====
+    //GETTER E SETTER -----------------------------------------------------------------------------------------------
 
     public Long getIdOpzione() {
         return idOpzione;

@@ -88,7 +88,6 @@ public class CandidaturaServiceImpl implements CandidaturaService {
 
         candidatura = candidaturaRepository.save(candidatura);
 
-        // Se la posizione ha un test → crea il tentativo base
         if (posizione.getIdTest() != null) {
 
             TentativoTest t = new TentativoTest();
@@ -135,7 +134,6 @@ public class CandidaturaServiceImpl implements CandidaturaService {
         return candidature.stream()
                 .map(c -> {
 
-                    // Ultimo tentativo completato
                     Integer punteggio = tentativoTestRepository
                             .findAllByIdCandidatura(c.getIdCandidatura())
                             .stream()
@@ -144,7 +142,6 @@ public class CandidaturaServiceImpl implements CandidaturaService {
                             .map(TentativoTest::getPunteggioTotale)
                             .orElse(null);
 
-                    // Numero domande del test collegato alla posizione
                     Integer numeroDomande = null;
                     Long idTest = c.getPosizione().getIdTest();
 
@@ -155,7 +152,6 @@ public class CandidaturaServiceImpl implements CandidaturaService {
                         }
                     }
 
-                    // DTO posizione interna
                     Posizione p = c.getPosizione();
                     CandidaturaMiaDto.PosizioneDto posDto =
                             new CandidaturaMiaDto.PosizioneDto(

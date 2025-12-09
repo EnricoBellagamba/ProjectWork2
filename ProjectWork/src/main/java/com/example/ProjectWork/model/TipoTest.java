@@ -15,8 +15,7 @@ public class TipoTest {
     @Column
     private String descrizione;
 
-
-    // getter e setter
+    //GETTER E SETTER -----------------------------------------------------------------------------------------------
 
 
     public Long getIdTipoTest() {

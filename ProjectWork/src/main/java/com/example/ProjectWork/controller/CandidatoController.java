@@ -27,7 +27,7 @@ public class CandidatoController {
     @GetMapping("/{id}")
     public ResponseEntity<Candidato> getCandidatoById(@PathVariable Long id) {
         Candidato candidato = candidatoService.getCandidatoById(id);
-        return ResponseEntity.ok(candidato); // 200 OK, NON 302 FOUND
+        return ResponseEntity.ok(candidato);
     }
 
     @PostMapping
@@ -54,13 +54,4 @@ public class CandidatoController {
     public List<CandidatoConPosizioneDTO> findCandidatiByPosizione(@PathVariable String titolo) {
         return candidatoService.getCandidatiByPosizione(titolo);
     }
-
-    //TODO:
-    // findAll, serve per trovare tutti i candidati per una determinata posizione  <- FATTO ->
-    // getCandidatoByID il singolo canidato per candidatura (magari per vederne il dettaglio e scaricarne in CV)
-    // createCandidato deve avvenire insieme alla creazione della candidatura
-    // l'update cambia solamente il suo stato (attivo o no) in base allo stato
-    // deleteCandidato facoltativa, alla fine dipende lo possiamo fare cascade nel momento in cui una candidatura viene eliminata
-    // PER la candidatura utilizziamo questa classe / un altra classe?
-    // CREAZIONE, MODIFICA (bella peso per il conto dei vari candidati), DELETE
 }

@@ -10,7 +10,6 @@ public class CompletaTestRequest {
     private LocalDateTime iniziatoAt;
     private List<RispostaInput> risposte;
 
-    // Classe interna per le risposte
     public static class RispostaInput {
         private Long idDomanda;
         private Long idOpzione;
@@ -34,7 +33,6 @@ public class CompletaTestRequest {
         }
     }
 
-    // Costruttore vuoto
     public CompletaTestRequest() {}
 
     // Getters e Setters
