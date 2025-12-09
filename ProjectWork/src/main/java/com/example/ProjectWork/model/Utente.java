@@ -1,6 +1,7 @@
 package com.example.ProjectWork.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -82,6 +83,7 @@ public class Utente {
             joinColumns = @JoinColumn(name = "idUtente"),
             inverseJoinColumns = @JoinColumn(name = "idPosizione")
     )
+    @JsonIgnore
     private List<Posizione> posizioniPreferite = new ArrayList<>();
 
     private Integer tokenVersion = 0;

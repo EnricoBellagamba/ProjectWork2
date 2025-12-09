@@ -189,7 +189,6 @@ public class UtenteServiceImpl implements UtenteService {
         Utente utente = utenteRepository.findById(idUtente).orElseThrow(() -> new  RuntimeException("Utente non trovato"));
 
         utente.getPosizioniPreferite().removeIf(p -> p.getIdPosizione().equals(idPosizione));
-
         utenteRepository.save(utente);
 
     }

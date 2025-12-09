@@ -1,5 +1,6 @@
 package com.example.ProjectWork.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 
@@ -56,6 +57,7 @@ public class Posizione {
     private Settore idSettore;
 
     @ManyToMany(mappedBy = "posizioniPreferite")
+    @JsonIgnore
     private List<Utente> utentiCheHannoPreferito = new ArrayList<>();
 
     @Column(name = "idTest")

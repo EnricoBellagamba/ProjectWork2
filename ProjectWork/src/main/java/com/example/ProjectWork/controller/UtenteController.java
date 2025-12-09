@@ -104,25 +104,17 @@ public class UtenteController {
     }
 
     @PostMapping("/{idUtente}/preferiti/{idPosizione}")
-
-    public ResponseEntity<Void> addFavorite(@PathVariable Long idUtente,
-
-                                            @PathVariable Long idPosizione) {
+    public ResponseEntity<Void> addFavorite(@PathVariable Long idUtente, @PathVariable Long idPosizione) {
 
         utenteService.addFavoritePosition(idPosizione, idUtente);
-
         return ResponseEntity.noContent().build();
 
     }
 
     @DeleteMapping("/{idUtente}/preferiti/{idPosizione}")
-
-    public ResponseEntity<Void> removeFavorite(@PathVariable Long idUtente,
-
-                                               @PathVariable Long idPosizione) {
+    public ResponseEntity<Void> removeFavorite(@PathVariable Long idUtente, @PathVariable Long idPosizione) {
 
         utenteService.removeFavoritePosition(idPosizione, idUtente);
-
         return ResponseEntity.noContent().build();
 
     }
@@ -132,7 +124,5 @@ public class UtenteController {
         List<Posizione> posizioni = utenteService.getPosizioniPreferiteByIdUtente(idUtente);
         return ResponseEntity.ok(posizioni);
     }
-
-
 }
 
